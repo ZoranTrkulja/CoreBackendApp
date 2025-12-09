@@ -1,0 +1,277 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Api\\CoreBackendApp.Api.csproj": {}
+  },
+  "projects": {
+    "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Api\\CoreBackendApp.Api.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Api\\CoreBackendApp.Api.csproj",
+        "projectName": "CoreBackendApp.Api",
+        "projectPath": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Api\\CoreBackendApp.Api.csproj",
+        "packagesPath": "C:\\Users\\ZoranTrkulja\\.nuget\\packages\\",
+        "outputPath": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Api\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\ZoranTrkulja\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Application\\CoreBackendApp.Application.csproj": {
+                "projectPath": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Application\\CoreBackendApp.Application.csproj"
+              },
+              "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Infrastructure\\CoreBackendApp.Infrastructure.csproj": {
+                "projectPath": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Infrastructure\\CoreBackendApp.Infrastructure.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Swashbuckle.AspNetCore": {
+              "target": "Package",
+              "version": "[6.6.2, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.122/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Application\\CoreBackendApp.Application.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Application\\CoreBackendApp.Application.csproj",
+        "projectName": "CoreBackendApp.Application",
+        "projectPath": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Application\\CoreBackendApp.Application.csproj",
+        "packagesPath": "C:\\Users\\ZoranTrkulja\\.nuget\\packages\\",
+        "outputPath": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Application\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\ZoranTrkulja\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Domain\\CoreBackendApp.Domain.csproj": {
+                "projectPath": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Domain\\CoreBackendApp.Domain.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "MediatR": {
+              "target": "Package",
+              "version": "[14.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.122/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Domain\\CoreBackendApp.Domain.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Domain\\CoreBackendApp.Domain.csproj",
+        "projectName": "CoreBackendApp.Domain",
+        "projectPath": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Domain\\CoreBackendApp.Domain.csproj",
+        "packagesPath": "C:\\Users\\ZoranTrkulja\\.nuget\\packages\\",
+        "outputPath": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Domain\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\ZoranTrkulja\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.122/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Infrastructure\\CoreBackendApp.Infrastructure.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Infrastructure\\CoreBackendApp.Infrastructure.csproj",
+        "projectName": "CoreBackendApp.Infrastructure",
+        "projectPath": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Infrastructure\\CoreBackendApp.Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\ZoranTrkulja\\.nuget\\packages\\",
+        "outputPath": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Infrastructure\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\ZoranTrkulja\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Application\\CoreBackendApp.Application.csproj": {
+                "projectPath": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Application\\CoreBackendApp.Application.csproj"
+              },
+              "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Domain\\CoreBackendApp.Domain.csproj": {
+                "projectPath": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Domain\\CoreBackendApp.Domain.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[9.0.11, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[9.0.11, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[9.0.11, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.122/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
