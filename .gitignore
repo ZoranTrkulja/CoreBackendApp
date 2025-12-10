@@ -1,6 +1,50 @@
 ﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+# .NET / Visual Studio
 ################################################################################
 
-/.vs
-/CoreBackendApp/.vs/CoreBackendApp
+# Build results
+bin/
+obj/
+[Bb]uild/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]ny [Cc][Pp][Uu]/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Rider / VS Code
+.idea/
+.vscode/
+
+# Logs
+*.log
+
+# Test results
+TestResults/
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+
+# Entity Framework
+Migrations/*.Designer.cs
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets & env
+appsettings.Development.json
+appsettings.Local.json
+.env
+
+################################################################################
