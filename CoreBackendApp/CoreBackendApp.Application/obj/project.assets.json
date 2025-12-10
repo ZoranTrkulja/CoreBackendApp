@@ -468,19 +468,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\ZoranTrkulja\\.nuget\\packages\\": {}
+    "C:\\Users\\T480s\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Application\\CoreBackendApp.Application.csproj",
+      "projectUniqueName": "D:\\Repos\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Application\\CoreBackendApp.Application.csproj",
       "projectName": "CoreBackendApp.Application",
-      "projectPath": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Application\\CoreBackendApp.Application.csproj",
-      "packagesPath": "C:\\Users\\ZoranTrkulja\\.nuget\\packages\\",
-      "outputPath": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Application\\obj\\",
+      "projectPath": "D:\\Repos\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Application\\CoreBackendApp.Application.csproj",
+      "packagesPath": "C:\\Users\\T480s\\.nuget\\packages\\",
+      "outputPath": "D:\\Repos\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Application\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\ZoranTrkulja\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\T480s\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -494,8 +499,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Domain\\CoreBackendApp.Domain.csproj": {
-              "projectPath": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Domain\\CoreBackendApp.Domain.csproj"
+            "D:\\Repos\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Domain\\CoreBackendApp.Domain.csproj": {
+              "projectPath": "D:\\Repos\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Domain\\CoreBackendApp.Domain.csproj"
             }
           }
         }
@@ -504,7 +509,13 @@
         "warnAsError": [
           "NU1605"
         ]
-      }
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net8.0": {
@@ -535,7 +546,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.122/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

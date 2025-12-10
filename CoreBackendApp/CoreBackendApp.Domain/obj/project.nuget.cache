@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "BrlFWIGW46zmDNrIiFEr7VWFtwtkEuZexBOcQUdq6e+tW757xPmhzxsohywXEBF6mW28jdYsOUhUFWvPcX0Iww==",
+  "dgSpecHash": "dmKAgUFzMMU=",
   "success": true,
-  "projectFilePath": "C:\\Repos\\ZoranTrkulja\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Domain\\CoreBackendApp.Domain.csproj",
+  "projectFilePath": "D:\\Repos\\CoreBackendApp\\CoreBackendApp\\CoreBackendApp.Domain\\CoreBackendApp.Domain.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }
