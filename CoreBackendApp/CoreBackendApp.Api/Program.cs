@@ -39,14 +39,13 @@ namespace CoreBackendApp.Api
 
             app.MapControllers();
 
-            app.Run();
-
-
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<CoreDbContext>();
                 await CoreDbSeeder.SeedAsync(db);
             }
+
+            app.Run();
         }
     }
 }
