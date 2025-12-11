@@ -1,7 +1,10 @@
 
+using CoreBackendApp.Application.Auth;
+using CoreBackendApp.Application.Interface;
 using CoreBackendApp.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
+using CoreBackendApp.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -48,6 +51,10 @@ namespace CoreBackendApp.Api
                 });
 
             builder.Services.AddAuthorization();
+
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<TokenService>();
+            builder.Services.AddScoped<AuthService>();
 
             var app = builder.Build();
 

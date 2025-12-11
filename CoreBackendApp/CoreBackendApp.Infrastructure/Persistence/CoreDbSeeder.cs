@@ -8,6 +8,25 @@ namespace CoreBackendApp.Infrastructure.Persistence
         {
             if (!context.Tenants.Any())
             {
+                var permissions = new[]
+                {
+                    new Permission{ Id = Guid.NewGuid(), Code = "user.read", Description = "Read users", CreatedAt = DateTime.UtcNow },
+                    new Permission{ Id = Guid.NewGuid(), Code = "user.create", Description = "Create users", CreatedAt = DateTime.UtcNow },
+                    new Permission{ Id = Guid.NewGuid(), Code = "user.manage", Description = "Manage all user data", CreatedAt = DateTime.UtcNow },
+
+                    new Permission { Id = Guid.NewGuid(), Code = "roles.read", Description = "Read roles", CreatedAt = DateTime.UtcNow },
+                    new Permission { Id = Guid.NewGuid(), Code = "roles.manage", Description = "Manage roles", CreatedAt = DateTime.UtcNow },
+
+                    new Permission { Id = Guid.NewGuid(), Code = "features.read", Description = "Read features", CreatedAt = DateTime.UtcNow }
+                };
+
+
+                foreach (var permission in permissions)
+                {
+                    if (!context.Permissions.Any(x => x.Code == permission.Code))
+                        context.Permissions.Add(permission);
+                }
+
                 var tenant = new Tenant("System");
 
                 var adminRole = new Role("Admin");
@@ -45,6 +64,17 @@ namespace CoreBackendApp.Infrastructure.Persistence
                     }
                 });
 
+                foreach (var permission in permissions)
+                {
+                    if(!context.RolePermissions.Any(rp => rp.RoleId == adminRole.Id && rp.PermissionId == permission.Id))
+                    {
+                        context.RolePermissions.Add(new RolePermission
+                        {
+                            RoleId = adminRole.Id,
+                            PermissionId = permission.Id
+                        });
+                    }
+                }
 
                 await context.SaveChangesAsync();
             }
