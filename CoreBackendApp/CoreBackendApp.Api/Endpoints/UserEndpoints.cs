@@ -6,7 +6,7 @@ namespace CoreBackendApp.Api.Endpoints
 {
     public static class UserEndpoints
     {
-        public static async Task<IEndpointRouteBuilder> MapUserEndpoint(this IEndpointRouteBuilder endpointRouteBuilder)
+        public static IEndpointRouteBuilder MapUserEndpoint(this IEndpointRouteBuilder endpointRouteBuilder)
         {
             var group = endpointRouteBuilder.MapGroup("/api/users").WithTags("Users");
 

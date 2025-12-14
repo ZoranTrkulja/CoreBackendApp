@@ -1,4 +1,5 @@
 
+using CoreBackendApp.Api.Endpoints;
 using CoreBackendApp.Application.Auth;
 using CoreBackendApp.Application.Interface;
 using CoreBackendApp.Infrastructure.Persistence;
@@ -6,8 +7,8 @@ using CoreBackendApp.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
-using CoreBackendApp.Api.Endpoints;
 
 namespace CoreBackendApp.Api
 {
@@ -17,15 +18,47 @@ namespace CoreBackendApp.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            Console.WriteLine("ENVIRONMENT = " + builder.Environment.EnvironmentName);
-            Console.WriteLine("Jwt:Key = " + builder.Configuration["Jwt:Key"]);
-
             // Add services to the container.
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "CoreBackendApp API",
+                    Version = "v1"
+                });
+
+                // JWT Bearer definition
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Name = "Authorization",
+                    Description = "Enter: Bearer {your JWT token}"
+                });
+
+                // Security requirement
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
+            });
+
 
             builder.Services.AddDbContext<CoreDbContext>(options =>
             {
@@ -54,7 +87,29 @@ namespace CoreBackendApp.Api
                     };
                 });
 
-            builder.Services.AddAuthorization();
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireAdminRole", policy =>
+                {
+                    policy.RequireRole("Admin");
+                });
+
+                options.AddPolicy("RequireUsersReadPermission", policy =>
+                {
+                    policy.RequireClaim("permissions", "users.read");
+                });
+
+                options.AddPolicy("RequireUsersManagePermission", policy =>
+                {
+                    policy.RequireClaim("permissions", "users.manage");
+                });
+
+                options.AddPolicy("RequireUsersFeature", policy =>
+                {
+                    policy.RequireClaim("features", "users");
+                });
+            });
+
 
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<TokenService>();
@@ -70,13 +125,8 @@ namespace CoreBackendApp.Api
             }
 
             app.UseAuthentication();
-            app.UseAuthentication();
-
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
-
-
             app.MapControllers();
 
             using (var scope = app.Services.CreateScope())
