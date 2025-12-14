@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using CoreBackendApp.Api.Endpoints;
 
 namespace CoreBackendApp.Api
 {
@@ -15,6 +16,9 @@ namespace CoreBackendApp.Api
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            Console.WriteLine("ENVIRONMENT = " + builder.Environment.EnvironmentName);
+            Console.WriteLine("Jwt:Key = " + builder.Configuration["Jwt:Key"]);
 
             // Add services to the container.
 
@@ -45,7 +49,7 @@ namespace CoreBackendApp.Api
                         ValidAudience = jwtSettings["Audience"],
 
                         IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT Secret Key not found."))),
+                            Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Secret Key not found."))),
                         ClockSkew = TimeSpan.Zero
                     };
                 });
@@ -80,6 +84,14 @@ namespace CoreBackendApp.Api
                 var db = scope.ServiceProvider.GetRequiredService<CoreDbContext>();
                 await CoreDbSeeder.SeedAsync(db);
             }
+
+
+            app.MapAuthEndpoints();
+            app.MapUserEndpoint();
+            app.MapRoleEndpoint();
+            app.MapPermissionEndpoint();
+            app.MapTenantEndpoint();
+            app.MapFeatureEndpoint();
 
             app.Run();
         }
