@@ -1,7 +1,8 @@
 ﻿namespace CoreBackendApp.Application.Auth
 {
-    public class LoginResponse
-    {
-        public string AccessToken { get; set; } = default!;
-    }
+    public record LoginResponse(
+        string AccessToken,
+        string RefreshToken,
+        DateTime AccessTokenExiresAt
+     );
 }

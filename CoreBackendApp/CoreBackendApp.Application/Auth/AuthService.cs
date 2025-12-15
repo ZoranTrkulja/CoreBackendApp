@@ -1,4 +1,5 @@
 ﻿using CoreBackendApp.Application.Interface;
+using System.Security.Cryptography;
 
 namespace CoreBackendApp.Application.Auth
 {
@@ -14,6 +15,7 @@ namespace CoreBackendApp.Application.Auth
             if (user == null || !BCrypt.Net.BCrypt.Verify(loginRequest.Password, user.PasswordHash))
                 throw new UnauthorizedAccessException("Invalid email or password.");
 
+            
             var roles = user.UserRoles.Select(ur => ur.Role.Name);
             var permissions = user.UserRoles
                 .SelectMany(ur => ur.Role.RolePermissions)
@@ -22,16 +24,26 @@ namespace CoreBackendApp.Application.Auth
             var features = user.Tenant.TenantFeatures
                 .Select(tf => tf.Feature.Key);
 
-            var token = _tokenService.GenerateAccessToken(
+            var toaccessTokenken = _tokenService.GenerateAccessToken(
                 user,
                 roles,
                 permissions,
                 features);
 
-            return new LoginResponse
-            {
-                AccessToken = token
-            };
+            var refreshTokenValue = GenerateRefreshToken();
+
+
+            return null;
+            //return new LoginResponse
+            //{
+            //    AccessToken = token
+            //};
+        }
+
+        private static string GenerateRefreshToken()
+        {
+            var bytes = RandomNumberGenerator.GetBytes(64);
+            return Convert.ToBase64String(bytes);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using CoreBackendApp.Domain.Entities;
+using CoreBackendApp.Infrastructure.Configurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace CoreBackendApp.Infrastructure.Persistence
@@ -19,6 +20,8 @@ namespace CoreBackendApp.Infrastructure.Persistence
 
         public DbSet<Feature> Features => Set<Feature>();
         public DbSet<TenantFeature> TenantFeatures => Set<TenantFeature>();
+
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -99,6 +102,8 @@ namespace CoreBackendApp.Infrastructure.Persistence
                       .WithMany(f => f.TenantFeatures)
                       .HasForeignKey(x => x.FeatureId);
             });
+
+            modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
         }
     }
 }

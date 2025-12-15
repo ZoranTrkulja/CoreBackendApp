@@ -19,7 +19,7 @@ namespace CoreBackendApp.Infrastructure.Repositories
                 .Include(x => x.Tenant)
                     .ThenInclude(t => t.TenantFeatures)
                         .ThenInclude(tf => tf.Feature)
-                .FirstOrDefaultAsync(x => x.Email == email)!;
+                .FirstOrDefaultAsync(x => x.Email == email && !x.IsDeleted)!;
         }
     }
 }
