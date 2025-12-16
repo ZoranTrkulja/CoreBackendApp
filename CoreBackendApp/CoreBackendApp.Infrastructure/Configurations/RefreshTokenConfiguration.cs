@@ -8,15 +8,16 @@ namespace CoreBackendApp.Infrastructure.Configurations
         public void Configure(Microsoft.EntityFrameworkCore.Metadata.Builders.EntityTypeBuilder<RefreshToken> builder)
         {
             builder.HasKey(x => x.Id);
-            builder.Property(x => x.Token)
+
+            builder.Property(x => x.TokenHash)
                 .IsRequired()
                 .HasMaxLength(512);
-            builder.HasIndex(x => x.Token)
+
+            builder.HasIndex(x => x.TokenHash)
                 .IsUnique();
 
-            builder.HasOne(x => x.User)
-                .WithMany()
-                .HasForeignKey(x => x.UserId);
+            builder.Property(x => x.CreatedByIp)
+                .HasMaxLength(100);
         }
     }
 }

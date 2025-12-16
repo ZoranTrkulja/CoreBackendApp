@@ -1,4 +1,6 @@
 ﻿using CoreBackendApp.Application.Auth;
+using CoreBackendApp.Application.Interface;
+using CoreBackendApp.Domain.Entities;
 
 namespace CoreBackendApp.Api.Endpoints
 {
@@ -8,21 +10,26 @@ namespace CoreBackendApp.Api.Endpoints
         {
             var group = endpointRouteBuilder.MapGroup("/api/auth").WithTags("Auth");
 
-            group.MapPost("/login", async (LoginRequest loginRequest, AuthService authService) =>
+            group.MapPost("/login", async (LoginRequest loginRequest, HttpContext httpContext, IAuthService authService) =>
             {
-                var result = await authService.LoginAsync(loginRequest);
+                var ipAddress = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+                var result = await authService.LoginAsync(loginRequest.Email, loginRequest.Password, ipAddress);
                 return Results.Ok(result);
             })
             .AllowAnonymous();
 
-            group.MapPost("/refresh", () =>
+            group.MapPost("/refresh", async (RefreshToken refreshToken, HttpContext httpContext, IAuthService authService) =>
             {
-                return Results.BadRequest("Not implemented yet");
+                var ipAddress = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                var result =  await authService.RefreshAsync(refreshToken.TokenHash, ipAddress);
+                return Results.Ok(result);
             });
 
-            group.MapPost("/logout", () =>
+            group.MapPost("/logout", async (RefreshToken refreshToken, IAuthService authService) =>
             {
-                return Results.BadRequest("Not implemented yet");
+                 await authService.LogoutAsync(refreshToken.TokenHash);
+                return Results.Ok();
             });
 
             return endpointRouteBuilder;

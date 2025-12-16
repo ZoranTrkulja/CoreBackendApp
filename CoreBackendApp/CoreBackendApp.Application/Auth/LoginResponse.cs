@@ -2,7 +2,6 @@
 {
     public record LoginResponse(
         string AccessToken,
-        string RefreshToken,
-        DateTime AccessTokenExiresAt
+        string RefreshToken
      );
 }

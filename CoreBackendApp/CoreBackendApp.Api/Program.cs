@@ -1,5 +1,6 @@
 
 using CoreBackendApp.Api.Endpoints;
+using CoreBackendApp.Api.Middleware;
 using CoreBackendApp.Application.Auth;
 using CoreBackendApp.Application.Interface;
 using CoreBackendApp.Infrastructure.Persistence;
@@ -113,7 +114,11 @@ namespace CoreBackendApp.Api
 
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<TokenService>();
-            builder.Services.AddScoped<AuthService>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
+            builder.Services.AddHealthChecks()
+                .AddDbContextCheck<CoreDbContext>();
 
             var app = builder.Build();
 
@@ -128,20 +133,21 @@ namespace CoreBackendApp.Api
             app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
-
-            using (var scope = app.Services.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<CoreDbContext>();
-                await CoreDbSeeder.SeedAsync(db);
-            }
-
-
             app.MapAuthEndpoints();
             app.MapUserEndpoint();
             app.MapRoleEndpoint();
             app.MapPermissionEndpoint();
             app.MapTenantEndpoint();
             app.MapFeatureEndpoint();
+
+            app.UseMiddleware<GlobalExceptionMiddleware>();
+            app.MapHealthChecks("/health");
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<CoreDbContext>();
+                await CoreDbSeeder.SeedAsync(db);
+            }
 
             app.Run();
         }
