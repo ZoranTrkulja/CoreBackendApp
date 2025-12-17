@@ -146,6 +146,9 @@ namespace CoreBackendApp.Api
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<CoreDbContext>();
+
+                db.Database.EnsureCreated();
+
                 await CoreDbSeeder.SeedAsync(db);
             }
 
