@@ -1,6 +1,7 @@
 ﻿using CoreBackendApp.Domain.Entities;
 using CoreBackendApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using CoreBackendApp.Api.Common.Validation;
 
 namespace CoreBackendApp.Api.Endpoints
 {
@@ -60,6 +61,7 @@ namespace CoreBackendApp.Api.Endpoints
 
                 return Results.Created($"/api/users/{user.Id}", user.Id);
             })
+            .AddEndpointFilter<ValidationFilter<CreateUserRequest>>()
             .RequireAuthorization("RequireUsersManagePermission");
 
 

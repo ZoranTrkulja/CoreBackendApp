@@ -1,6 +1,7 @@
 ﻿using CoreBackendApp.Application.Auth;
 using CoreBackendApp.Application.Interface;
 using CoreBackendApp.Domain.Entities;
+using CoreBackendApp.Api.Common.Validation;
 
 namespace CoreBackendApp.Api.Endpoints
 {
@@ -17,6 +18,7 @@ namespace CoreBackendApp.Api.Endpoints
                 var result = await authService.LoginAsync(loginRequest.Email, loginRequest.Password, ipAddress);
                 return Results.Ok(result);
             })
+            .AddEndpointFilter<ValidationFilter<LoginRequest>>()
             .AllowAnonymous();
 
             group.MapPost("/refresh", async (RefreshToken refreshToken, HttpContext httpContext, IAuthService authService) =>
