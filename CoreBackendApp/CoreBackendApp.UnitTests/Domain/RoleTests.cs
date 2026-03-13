@@ -23,9 +23,9 @@ public class RoleTests
     [InlineData("")]
     [InlineData(" ")]
     [InlineData(null)]
-    public void Create_WithInvalidName_ShouldThrowArgumentException(string name)
+    public void Create_WithInvalidName_ShouldThrowArgumentException(string? name)
     {
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => Role.Create(name));
+        Assert.Throws<ArgumentException>(() => Role.Create(name!));
     }
 }

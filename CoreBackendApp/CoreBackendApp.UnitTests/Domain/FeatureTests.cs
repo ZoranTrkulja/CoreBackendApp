@@ -28,9 +28,9 @@ public class FeatureTests
     [InlineData("Valid Key", " ")]
     [InlineData(null, "Valid Name")]
     [InlineData("Valid Key", null)]
-    public void Create_WithInvalidArguments_ShouldThrowArgumentException(string key, string name)
+    public void Create_WithInvalidArguments_ShouldThrowArgumentException(string? key, string? name)
     {
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => Feature.Create(key, name));
+        Assert.Throws<ArgumentException>(() => Feature.Create(key!, name!));
     }
 }

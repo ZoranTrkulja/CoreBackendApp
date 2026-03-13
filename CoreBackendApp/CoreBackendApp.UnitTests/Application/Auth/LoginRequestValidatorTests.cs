@@ -25,10 +25,10 @@ public class LoginRequestValidatorTests
     [InlineData("")]
     [InlineData(" ")]
     [InlineData(null)]
-    public void Validate_WithEmptyEmail_ShouldHaveError(string email)
+    public void Validate_WithEmptyEmail_ShouldHaveError(string? email)
     {
         // Arrange
-        var request = new LoginRequest(email, "password123");
+        var request = new LoginRequest(email!, "password123");
 
         // Act
         var result = _validator.TestValidate(request);
@@ -54,10 +54,10 @@ public class LoginRequestValidatorTests
     [InlineData("")]
     [InlineData(" ")]
     [InlineData(null)]
-    public void Validate_WithEmptyPassword_ShouldHaveError(string password)
+    public void Validate_WithEmptyPassword_ShouldHaveError(string? password)
     {
         // Arrange
-        var request = new LoginRequest("test@example.com", password);
+        var request = new LoginRequest("test@example.com", password!);
 
         // Act
         var result = _validator.TestValidate(request);

@@ -9,7 +9,7 @@ public static class UserEndpoints
 {
     public static IEndpointRouteBuilder MapUserEndpoint(this IEndpointRouteBuilder endpointRouteBuilder)
     {
-        var group = endpointRouteBuilder.MapGroup("/api/users").WithTags("Users");
+        var group = endpointRouteBuilder.MapGroup("users").WithTags("Users");
 
         group.MapGet("/", async (CoreDbContext coreDbContext) =>
         {
@@ -56,7 +56,7 @@ public static class UserEndpoints
             coreDbContext.Users.Add(user);
             await coreDbContext.SaveChangesAsync();
 
-            return Results.Created($"/api/users/{user.Id}", user.Id);
+            return Results.Created($"/v1/users/{user.Id}", user.Id);
         })
         .AddEndpointFilter<ValidationFilter<CreateUserRequest>>()
         .RequireAuthorization("RequireUsersManagePermission");

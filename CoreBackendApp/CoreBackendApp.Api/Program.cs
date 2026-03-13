@@ -31,6 +31,21 @@ namespace CoreBackendApp.Api
             builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
 
             builder.Services.AddScoped<ITenantProvider, TenantProvider>();
+
+            // Add API Versioning
+            builder.Services.AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new Asp.Versioning.ApiVersion(1, 0);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ReportApiVersions = true;
+                options.ApiVersionReader = new Asp.Versioning.UrlSegmentApiVersionReader();
+            })
+            .AddApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVV";
+                options.SubstituteApiVersionInUrl = true;
+            });
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
@@ -142,12 +157,21 @@ namespace CoreBackendApp.Api
             app.UseHttpsRedirection();
             app.UseAuthorization();
             app.MapControllers();
-            app.MapAuthEndpoints();
-            app.MapUserEndpoint();
-            app.MapRoleEndpoint();
-            app.MapPermissionEndpoint();
-            app.MapTenantEndpoint();
-            app.MapFeatureEndpoint();
+
+            var apiVersionSet = app.NewApiVersionSet()
+                .HasApiVersion(new Asp.Versioning.ApiVersion(1, 0))
+                .ReportApiVersions()
+                .Build();
+
+            var versionedGroup = app.MapGroup("api/v{version:apiVersion}")
+                .WithApiVersionSet(apiVersionSet);
+
+            versionedGroup.MapAuthEndpoints();
+            versionedGroup.MapUserEndpoint();
+            versionedGroup.MapRoleEndpoint();
+            versionedGroup.MapPermissionEndpoint();
+            versionedGroup.MapTenantEndpoint();
+            versionedGroup.MapFeatureEndpoint();
 
             app.UseMiddleware<GlobalExceptionMiddleware>();
             app.MapHealthChecks("/health");

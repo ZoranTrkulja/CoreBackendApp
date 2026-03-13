@@ -24,9 +24,9 @@ public class TenantTests
     [InlineData("")]
     [InlineData(" ")]
     [InlineData(null)]
-    public void Create_WithInvalidName_ShouldThrowArgumentException(string name)
+    public void Create_WithInvalidName_ShouldThrowArgumentException(string? name)
     {
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => Tenant.Create(name));
+        Assert.Throws<ArgumentException>(() => Tenant.Create(name!));
     }
 }
