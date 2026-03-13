@@ -1,7 +1,7 @@
 
 using CoreBackendApp.Api.Endpoints;
 using CoreBackendApp.Api.Middleware;
-using CoreBackendApp.Api.Services;
+using CoreBackendApp.Infrastructure.Services;
 using CoreBackendApp.Application.Auth;
 using CoreBackendApp.Application.Interface;
 using CoreBackendApp.Application.Common.Interfaces;

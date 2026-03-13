@@ -1,8 +1,3 @@
-﻿namespace CoreBackendApp.Application.Auth
-{
-    public class LoginRequest
-    {
-        public string Email { get; set; } = default!;
-        public string Password { get; set; } = default!;
-    }
-}
+namespace CoreBackendApp.Application.Auth;
+
+public record LoginRequest(string Email, string Password);
