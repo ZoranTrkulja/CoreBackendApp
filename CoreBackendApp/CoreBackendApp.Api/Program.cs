@@ -1,8 +1,10 @@
 
 using CoreBackendApp.Api.Endpoints;
 using CoreBackendApp.Api.Middleware;
+using CoreBackendApp.Api.Services;
 using CoreBackendApp.Application.Auth;
 using CoreBackendApp.Application.Interface;
+using CoreBackendApp.Application.Common.Interfaces;
 using CoreBackendApp.Infrastructure.Persistence;
 using CoreBackendApp.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -23,9 +25,12 @@ namespace CoreBackendApp.Api
             // Add services to the container.
 
             builder.Services.AddControllers();
+            builder.Services.AddHttpContextAccessor();
             
             // Add FluentValidation
             builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
+
+            builder.Services.AddScoped<ITenantProvider, TenantProvider>();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>

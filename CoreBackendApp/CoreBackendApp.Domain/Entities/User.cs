@@ -1,8 +1,9 @@
 using CoreBackendApp.Domain.Common;
+using CoreBackendApp.Domain.Interfaces;
 
 namespace CoreBackendApp.Domain.Entities;
 
-public class User : BaseEntity
+public class User : BaseEntity, ITenantEntity
 {
     // Use private setters to protect the domain state
     public string Email { get; private set; } = default!;

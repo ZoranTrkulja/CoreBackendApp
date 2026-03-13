@@ -1,4 +1,6 @@
-﻿using CoreBackendApp.Domain.Entities;
+using CoreBackendApp.Application.Common.Interfaces;
+using CoreBackendApp.Domain.Entities;
+using CoreBackendApp.Domain.Interfaces;
 using CoreBackendApp.Infrastructure.Configurations;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,8 +8,13 @@ namespace CoreBackendApp.Infrastructure.Persistence
 {
     public class CoreDbContext : DbContext
     {
-        public CoreDbContext(DbContextOptions<CoreDbContext> options) : base(options)
+        private readonly ITenantProvider _tenantProvider;
+
+        public CoreDbContext(
+            DbContextOptions<CoreDbContext> options,
+            ITenantProvider tenantProvider) : base(options)
         {
+            _tenantProvider = tenantProvider;
         }
 
         public DbSet<User> Users => Set<User>();
@@ -26,6 +33,23 @@ namespace CoreBackendApp.Infrastructure.Persistence
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Apply Global Query Filter for Multi-Tenancy
+            var currentTenantId = _tenantProvider.TenantId;
+
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                if (typeof(ITenantEntity).IsAssignableFrom(entityType.ClrType))
+                {
+                    var parameter = System.Linq.Expressions.Expression.Parameter(entityType.ClrType, "e");
+                    var property = System.Linq.Expressions.Expression.Property(parameter, nameof(ITenantEntity.TenantId));
+                    var tenantIdValue = System.Linq.Expressions.Expression.Constant(currentTenantId ?? Guid.Empty);
+                    var comparison = System.Linq.Expressions.Expression.Equal(property, tenantIdValue);
+                    var lambda = System.Linq.Expressions.Expression.Lambda(comparison, parameter);
+
+                    modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
+                }
+            }
 
             modelBuilder.Entity<User>(entity =>
             {
