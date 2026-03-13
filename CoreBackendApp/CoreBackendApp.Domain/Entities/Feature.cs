@@ -1,21 +1,27 @@
-﻿using CoreBackendApp.Domain.Common;
+using CoreBackendApp.Domain.Common;
 
-namespace CoreBackendApp.Domain.Entities
+namespace CoreBackendApp.Domain.Entities;
+
+public class Feature : BaseEntity
 {
-    public class Feature : BaseEntity
+    public string Key { get; private set; } = default!;
+    public string Name { get; private set; } = default!;
+
+    public ICollection<TenantFeature> TenantFeatures { get; private set; } = new List<TenantFeature>();
+
+    private Feature() { }
+
+    public static Feature Create(string key, string name)
     {
-        public string Key { get; private set; } = default!;
-        public string Name { get; private set; } = default!;
+        if (string.IsNullOrWhiteSpace(key)) throw new ArgumentException("Key cannot be empty.");
+        if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Name cannot be empty.");
 
-        public ICollection<TenantFeature> TenantFeatures { get; private set; } = new List<TenantFeature>();
-
-        public Feature()
+        return new Feature
         {
-        }   
-        public Feature(string key, string name)
-        {
-            Key = key;
-            Name = name;
-        }
+            Id = Guid.NewGuid(),
+            Key = key,
+            Name = name,
+            CreatedAt = DateTime.UtcNow
+        };
     }
 }

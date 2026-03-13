@@ -1,35 +1,67 @@
-﻿using CoreBackendApp.Domain.Common;
+using CoreBackendApp.Domain.Common;
 
-namespace CoreBackendApp.Domain.Entities
+namespace CoreBackendApp.Domain.Entities;
+
+public class User : BaseEntity
 {
-    public class User : BaseEntity
+    // Use private setters to protect the domain state
+    public string Email { get; private set; } = default!;
+    public string PasswordHash { get; private set; } = default!;
+    public bool IsEmailConfirmed { get; private set; } = false;
+    public Guid TenantId { get; private set; }
+
+    // Navigation properties
+    public Tenant Tenant { get; private set; } = default!;
+    public ICollection<UserRole> UserRoles { get; private set; } = new List<UserRole>();
+
+    // Required for EF Core
+    private User() { }
+
+    // Static Factory Method for explicit creation
+    public static User Create(string email, string passwordHash, Guid tenantId)
     {
-        public string Email { get; set; } = default;
-        public string PasswordHash { get; set; } = default;
+        // Add domain validation here if needed (e.g., email format)
+        if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("Email cannot be empty.");
+        if (string.IsNullOrWhiteSpace(passwordHash)) throw new ArgumentException("Password hash cannot be empty.");
+        if (tenantId == Guid.Empty) throw new ArgumentException("Tenant ID must be provided.");
 
-        public bool IsEmailConfirmed { get; set; } = false;
-
-        public Guid TenantId { get; set; }
-        public Tenant Tenant { get; set; } = default!;
-
-        public ICollection<UserRole> UserRoles { get; private set; } = new List<UserRole>();
-
-        public User()
+        return new User
         {
+            Id = Guid.NewGuid(),
+            Email = email,
+            PasswordHash = passwordHash,
+            TenantId = tenantId,
+            CreatedAt = DateTime.UtcNow
+        };
+    }
 
-        }
+    public void UpdatePassword(string newPasswordHash)
+    {
+        if (string.IsNullOrWhiteSpace(newPasswordHash)) 
+            throw new ArgumentException("New password hash cannot be empty.");
 
-        public User(string email, string passwordHash, Guid tenantId)
+        PasswordHash = newPasswordHash;
+        MarkAsUpdated();
+    }
+
+    public void ConfirmEmail()
+    {
+        if (IsEmailConfirmed) return;
+
+        IsEmailConfirmed = true;
+        MarkAsUpdated();
+    }
+
+    public void AssignRole(Guid roleId)
+    {
+        if (UserRoles.Any(ur => ur.RoleId == roleId)) return;
+
+        UserRoles.Add(new UserRole
         {
-            Email = email;
-            PasswordHash = passwordHash;
-            TenantId = tenantId;
-        }
-
-        public void ConfirmEmail()
-        {
-            IsEmailConfirmed = true;
-            MarkAsUpdated();
-        }
+            UserId = Id,
+            RoleId = roleId
+        });
+        
+        MarkAsUpdated();
     }
 }

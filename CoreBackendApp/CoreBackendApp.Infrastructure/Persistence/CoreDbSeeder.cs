@@ -1,4 +1,4 @@
-﻿using CoreBackendApp.Domain.Entities;
+using CoreBackendApp.Domain.Entities;
 
 namespace CoreBackendApp.Infrastructure.Persistence
 {
@@ -27,17 +27,17 @@ namespace CoreBackendApp.Infrastructure.Persistence
                         context.Permissions.Add(permission);
                 }
 
-                var tenant = new Tenant("System");
+                var tenant = Tenant.Create("System");
 
-                var adminRole = new Role("Admin");
-                var userRole = new Role("User");
+                var adminRole = Role.Create("Admin");
+                var userRole = Role.Create("User");
 
-                var axiomFeature = new Feature("AxiomWork", "AxiomWork");
-                var structinoFeature = new Feature("Structino", "Structino");
+                var axiomFeature = Feature.Create("AxiomWork", "AxiomWork");
+                var structinoFeature = Feature.Create("Structino", "Structino");
 
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!");
 
-                var adminUser = new User("admin@core.local", passwordHash, tenant.Id);
+                var adminUser = User.Create("admin@core.local", passwordHash, tenant.Id);
 
                 context.Tenants.Add(tenant);
                 context.Roles.AddRange(adminRole, userRole);
