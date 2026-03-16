@@ -13,6 +13,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using FluentValidation;
+using Serilog;
+using Serilog.Events;
 
 namespace CoreBackendApp.Api
 {
@@ -20,9 +22,25 @@ namespace CoreBackendApp.Api
     {
         public static async Task Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .WriteTo.File(
+                    new Serilog.Formatting.Compact.CompactJsonFormatter(),
+                    "logs/logs.json",
+                    rollingInterval: RollingInterval.Day)
+                .WriteTo.Seq("http://localhost:5341")
+                .CreateLogger();
 
-            // Add services to the container.
+            try
+            {
+                Log.Information("Starting web host");
+                var builder = WebApplication.CreateBuilder(args);
+
+                builder.Host.UseSerilog();
+
+                // Add services to the container.
 
             builder.Services.AddControllers();
             builder.Services.AddHttpContextAccessor();
@@ -173,6 +191,7 @@ namespace CoreBackendApp.Api
             versionedGroup.MapTenantEndpoint();
             versionedGroup.MapFeatureEndpoint();
 
+            app.UseMiddleware<LogEnrichmentMiddleware>();
             app.UseMiddleware<GlobalExceptionMiddleware>();
             app.MapHealthChecks("/health");
 
@@ -186,6 +205,15 @@ namespace CoreBackendApp.Api
             }
 
             app.Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Host terminated unexpectedly");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
     }
 }
