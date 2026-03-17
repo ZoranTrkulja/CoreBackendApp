@@ -7,6 +7,7 @@ namespace CoreBackendApp.Application.Interface
         Task AddAsync(RefreshToken refreshToken);
         Task<RefreshToken?> GetActiveByUserIdAsync(Guid userId);
         Task<RefreshToken?> GetByTokenAsync(string refreshToken);
+        Task RevokeAllForUserAsync(Guid userId);
         public Task SaveChangesAsync();
     }
 }

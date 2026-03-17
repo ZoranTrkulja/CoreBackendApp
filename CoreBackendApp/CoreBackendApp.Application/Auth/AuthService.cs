@@ -1,4 +1,4 @@
-﻿using CoreBackendApp.Application.Interface;
+using CoreBackendApp.Application.Interface;
 using CoreBackendApp.Domain.Entities;
 using System.Security;
 
@@ -19,15 +19,9 @@ namespace CoreBackendApp.Application.Auth
 
             var roles = await _userRepository.GetRolesAsync(user.Id);
             var permissions = await _userRepository.GetPermissionsAsync(user.Id);
-
             var features = await _userRepository.GetFeaturesAsync(user.Id);
 
-            var accessToken = _tokenService.GenerateAccessToken(
-                user,
-                roles,
-                permissions,
-                features);
-
+            var accessToken = _tokenService.GenerateAccessToken(user, roles, permissions, features);
             var refreshToken = _tokenService.GenerateRefreshToken();
             var tokenHash = _tokenService.GetHashToken(refreshToken);
 
@@ -46,24 +40,40 @@ namespace CoreBackendApp.Application.Auth
 
         public async Task<LoginResponse> RefreshAsync(string refreshToken, string ipAddress)
         {
-            var existingToken = await _refreshTokenRepository.GetByTokenAsync(refreshToken) ?? throw new SecurityException("Invalid refresh token"); ;
+            var existingToken = await _refreshTokenRepository.GetByTokenAsync(refreshToken);
             
-            if(!existingToken.IsActive)
+            if (existingToken == null)
                 throw new UnauthorizedAccessException("Invalid refresh token.");
+
+            // --- REUSE DETECTION ---
+            if (existingToken.RevokedAt != null)
+            {
+                // This token was already used! Potential theft.
+                // Revoke ALL active tokens for this user as a security measure.
+                await _refreshTokenRepository.RevokeAllForUserAsync(existingToken.UserId);
+                throw new UnauthorizedAccessException("Refresh token reuse detected! All sessions revoked.");
+            }
+
+            if (existingToken.IsExpired)
+                throw new UnauthorizedAccessException("Refresh token expired.");
 
             var user = await _userRepository.GetByIdAsync(existingToken.UserId) ??
                 throw new UnauthorizedAccessException("User not found.");
 
+            // --- TOKEN ROTATION ---
+            // 1. Revoke the old token
             existingToken.RevokedAt = DateTime.UtcNow;
+            
+            // 2. Generate a new pair
             var newRefreshToken = _tokenService.GenerateRefreshToken();
             var newTokenHash = _tokenService.GetHashToken(newRefreshToken);
 
+            // 3. Link them for audit trail
             existingToken.ReplacedByTokenHash = newTokenHash;
-
 
             await _refreshTokenRepository.AddAsync(new RefreshToken
             {
-                Id= Guid.NewGuid(),
+                Id = Guid.NewGuid(),
                 UserId = user.Id,
                 TokenHash = newTokenHash,
                 CreatedAt = DateTime.UtcNow,
@@ -71,25 +81,25 @@ namespace CoreBackendApp.Application.Auth
                 CreatedByIp = ipAddress
             });
 
+            // 4. Update the user's tokens in DB
+            await _refreshTokenRepository.SaveChangesAsync();
+
             var roles = await _userRepository.GetRolesAsync(user.Id);
             var permissions = await _userRepository.GetPermissionsAsync(user.Id);
             var features = await _userRepository.GetFeaturesAsync(user.Id);
 
-            var accessToken = _tokenService.GenerateAccessToken(
-                user,
-                roles,
-                permissions,
-                features);
+            var accessToken = _tokenService.GenerateAccessToken(user, roles, permissions, features);
 
             return new LoginResponse(accessToken, newRefreshToken);
         }
 
         public async Task LogoutAsync(string refreshToken)
         {
-            var existingToken = await _refreshTokenRepository.GetByTokenAsync(refreshToken) ??
-                throw new SecurityException("Invalid refresh token");
-            if (!existingToken.IsActive)
+            var existingToken = await _refreshTokenRepository.GetByTokenAsync(refreshToken);
+            
+            if (existingToken == null || !existingToken.IsActive)
                 throw new UnauthorizedAccessException("Invalid refresh token.");
+
             existingToken.RevokedAt = DateTime.UtcNow;
             await _refreshTokenRepository.SaveChangesAsync();
         }
