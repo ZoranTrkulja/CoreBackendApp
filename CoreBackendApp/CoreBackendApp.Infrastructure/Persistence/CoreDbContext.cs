@@ -45,9 +45,13 @@ namespace CoreBackendApp.Infrastructure.Persistence
                     var property = System.Linq.Expressions.Expression.Property(parameter, nameof(ITenantEntity.TenantId));
                     var tenantIdValue = System.Linq.Expressions.Expression.Constant(currentTenantId ?? Guid.Empty);
                     var comparison = System.Linq.Expressions.Expression.Equal(property, tenantIdValue);
-                    var lambda = System.Linq.Expressions.Expression.Lambda(comparison, parameter);
-
-                    modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
+                    
+                    // Only apply filter if we have a tenant context
+                    if (currentTenantId != null)
+                    {
+                        var lambda = System.Linq.Expressions.Expression.Lambda(comparison, parameter);
+                        modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
+                    }
                 }
             }
 

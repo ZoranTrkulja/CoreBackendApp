@@ -1,4 +1,3 @@
-
 using CoreBackendApp.Api.Endpoints;
 using CoreBackendApp.Api.Middleware;
 using CoreBackendApp.Infrastructure.Services;
@@ -41,170 +40,146 @@ namespace CoreBackendApp.Api
                 builder.Host.UseSerilog();
 
                 // Add services to the container.
+                builder.Services.AddControllers();
+                builder.Services.AddHttpContextAccessor();
+                
+                // Add FluentValidation
+                builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
 
-            builder.Services.AddControllers();
-            builder.Services.AddHttpContextAccessor();
-            
-            // Add FluentValidation
-            builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
+                builder.Services.AddScoped<ITenantProvider, TenantProvider>();
 
-            builder.Services.AddScoped<ITenantProvider, TenantProvider>();
-
-            // Add API Versioning
-            builder.Services.AddApiVersioning(options =>
-            {
-                options.DefaultApiVersion = new Asp.Versioning.ApiVersion(1, 0);
-                options.AssumeDefaultVersionWhenUnspecified = true;
-                options.ReportApiVersions = true;
-                options.ApiVersionReader = new Asp.Versioning.UrlSegmentApiVersionReader();
-            })
-            .AddApiExplorer(options =>
-            {
-                options.GroupNameFormat = "'v'VVV";
-                options.SubstituteApiVersionInUrl = true;
-            });
-
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo
+                // Add API Versioning
+                builder.Services.AddApiVersioning(options =>
                 {
-                    Title = "CoreBackendApp API",
-                    Version = "v1"
+                    options.DefaultApiVersion = new Asp.Versioning.ApiVersion(1, 0);
+                    options.AssumeDefaultVersionWhenUnspecified = true;
+                    options.ReportApiVersions = true;
+                    options.ApiVersionReader = new Asp.Versioning.UrlSegmentApiVersionReader();
+                })
+                .AddApiExplorer(options =>
+                {
+                    options.GroupNameFormat = "'v'VVV";
+                    options.SubstituteApiVersionInUrl = true;
                 });
 
-                // JWT Bearer definition
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                builder.Services.AddEndpointsApiExplorer();
+                builder.Services.AddSwaggerGen(c =>
                 {
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "bearer",
-                    BearerFormat = "JWT",
-                    In = ParameterLocation.Header,
-                    Name = "Authorization",
-                    Description = "Enter: Bearer {your JWT token}"
-                });
-
-                // Security requirement
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
+                    c.SwaggerDoc("v1", new OpenApiInfo { Title = "CoreBackendApp API", Version = "v1" });
+                    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                     {
-                        new OpenApiSecurityScheme
+                        Type = SecuritySchemeType.Http,
+                        Scheme = "bearer",
+                        BearerFormat = "JWT",
+                        In = ParameterLocation.Header,
+                        Name = "Authorization",
+                        Description = "Enter: Bearer {your JWT token}"
+                    });
+                    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                    {
                         {
-                            Reference = new OpenApiReference
+                            new OpenApiSecurityScheme
                             {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        Array.Empty<string>()
-                    }
+                                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+                            },
+                            Array.Empty<string>()
+                        }
+                    });
                 });
-            });
 
-
-            builder.Services.AddDbContext<CoreDbContext>(options =>
-            {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found."));
-            });
-
-            var jwtSettings = builder.Configuration.GetSection("Jwt");
-
-            builder.Services
-                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+                // Conditional Database Registration
+                if (builder.Environment.EnvironmentName == "Testing")
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
+                    builder.Services.AddDbContext<CoreDbContext>(options =>
                     {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-
-                        ValidIssuer = jwtSettings["Issuer"],
-                        ValidAudience = jwtSettings["Audience"],
-
-                        IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Secret Key not found."))),
-                        ClockSkew = TimeSpan.Zero
-                    };
-                });
-
-            builder.Services.AddAuthorization(options =>
-            {
-                options.AddPolicy("RequireAdminRole", policy =>
+                        options.UseInMemoryDatabase("TestDatabase");
+                    });
+                }
+                else
                 {
-                    policy.RequireRole("Admin");
-                });
+                    builder.Services.AddDbContext<CoreDbContext>(options =>
+                    {
+                        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? 
+                            throw new InvalidOperationException("Connection string 'DefaultConnection' not found."));
+                    });
+                }
 
-                options.AddPolicy("RequireUsersReadPermission", policy =>
+                var jwtSettings = builder.Configuration.GetSection("Jwt");
+                builder.Services
+                    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                    .AddJwtBearer(options =>
+                    {
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuer = true,
+                            ValidateAudience = true,
+                            ValidateLifetime = true,
+                            ValidateIssuerSigningKey = true,
+                            ValidIssuer = jwtSettings["Issuer"],
+                            ValidAudience = jwtSettings["Audience"],
+                            IssuerSigningKey = new SymmetricSecurityKey(
+                                Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? "YourSuperSecretKeyThatIsVeryLong123!")),
+                            ClockSkew = TimeSpan.Zero
+                        };
+                    });
+
+                builder.Services.AddAuthorization(options =>
                 {
-                    policy.RequireClaim("permissions", "users.read");
+                    options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+                    options.AddPolicy("RequireUsersReadPermission", policy => policy.RequireClaim("permissions", "users.read"));
+                    options.AddPolicy("RequireUsersManagePermission", policy => policy.RequireClaim("permissions", "users.manage"));
+                    options.AddPolicy("RequireUsersFeature", policy => policy.RequireClaim("features", "users"));
                 });
 
-                options.AddPolicy("RequireUsersManagePermission", policy =>
+                builder.Services.AddScoped<IUserRepository, UserRepository>();
+                builder.Services.AddScoped<TokenService>();
+                builder.Services.AddScoped<IAuthService, AuthService>();
+                builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+
+                builder.Services.AddHealthChecks().AddDbContextCheck<CoreDbContext>();
+
+                var app = builder.Build();
+
+                if (app.Environment.IsDevelopment())
                 {
-                    policy.RequireClaim("permissions", "users.manage");
-                });
+                    app.UseSwagger();
+                    app.UseSwaggerUI();
+                }
 
-                options.AddPolicy("RequireUsersFeature", policy =>
+                app.UseAuthentication();
+                app.UseHttpsRedirection();
+                app.UseAuthorization();
+                app.MapControllers();
+
+                var apiVersionSet = app.NewApiVersionSet()
+                    .HasApiVersion(new Asp.Versioning.ApiVersion(1, 0))
+                    .ReportApiVersions()
+                    .Build();
+
+                var versionedGroup = app.MapGroup("api/v{version:apiVersion}")
+                    .WithApiVersionSet(apiVersionSet);
+
+                versionedGroup.MapAuthEndpoints();
+                versionedGroup.MapUserEndpoint();
+                versionedGroup.MapRoleEndpoint();
+                versionedGroup.MapPermissionEndpoint();
+                versionedGroup.MapTenantEndpoint();
+                versionedGroup.MapFeatureEndpoint();
+
+                app.UseMiddleware<LogEnrichmentMiddleware>();
+                app.UseMiddleware<GlobalExceptionMiddleware>();
+                app.MapHealthChecks("/health");
+
+                // Seed only if NOT in Testing
+                if (app.Environment.EnvironmentName != "Testing")
                 {
-                    policy.RequireClaim("features", "users");
-                });
-            });
+                    using var scope = app.Services.CreateScope();
+                    var db = scope.ServiceProvider.GetRequiredService<CoreDbContext>();
+                    db.Database.EnsureCreated();
+                    await CoreDbSeeder.SeedAsync(db);
+                }
 
-
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
-            builder.Services.AddScoped<TokenService>();
-            builder.Services.AddScoped<IAuthService, AuthService>();
-            builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-
-            builder.Services.AddHealthChecks()
-                .AddDbContextCheck<CoreDbContext>();
-
-            var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
-
-            app.UseAuthentication();
-            app.UseHttpsRedirection();
-            app.UseAuthorization();
-            app.MapControllers();
-
-            var apiVersionSet = app.NewApiVersionSet()
-                .HasApiVersion(new Asp.Versioning.ApiVersion(1, 0))
-                .ReportApiVersions()
-                .Build();
-
-            var versionedGroup = app.MapGroup("api/v{version:apiVersion}")
-                .WithApiVersionSet(apiVersionSet);
-
-            versionedGroup.MapAuthEndpoints();
-            versionedGroup.MapUserEndpoint();
-            versionedGroup.MapRoleEndpoint();
-            versionedGroup.MapPermissionEndpoint();
-            versionedGroup.MapTenantEndpoint();
-            versionedGroup.MapFeatureEndpoint();
-
-            app.UseMiddleware<LogEnrichmentMiddleware>();
-            app.UseMiddleware<GlobalExceptionMiddleware>();
-            app.MapHealthChecks("/health");
-
-            using (var scope = app.Services.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<CoreDbContext>();
-
-                db.Database.EnsureCreated();
-
-                await CoreDbSeeder.SeedAsync(db);
-            }
-
-            app.Run();
+                app.Run();
             }
             catch (Exception ex)
             {
