@@ -3,6 +3,7 @@ using CoreBackendApp.Domain.Entities;
 using CoreBackendApp.Domain.Interfaces;
 using CoreBackendApp.Infrastructure.Configurations;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace CoreBackendApp.Infrastructure.Persistence
 {
@@ -30,28 +31,17 @@ namespace CoreBackendApp.Infrastructure.Persistence
 
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
+        public Guid CurrentTenantId => _tenantProvider.TenantId ?? Guid.Empty;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            // Apply Global Query Filter for Multi-Tenancy
-            var currentTenantId = _tenantProvider.TenantId;
 
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
                 if (typeof(ITenantEntity).IsAssignableFrom(entityType.ClrType))
                 {
-                    var parameter = System.Linq.Expressions.Expression.Parameter(entityType.ClrType, "e");
-                    var property = System.Linq.Expressions.Expression.Property(parameter, nameof(ITenantEntity.TenantId));
-                    var tenantIdValue = System.Linq.Expressions.Expression.Constant(currentTenantId ?? Guid.Empty);
-                    var comparison = System.Linq.Expressions.Expression.Equal(property, tenantIdValue);
-                    
-                    // Only apply filter if we have a tenant context
-                    if (currentTenantId != null)
-                    {
-                        var lambda = System.Linq.Expressions.Expression.Lambda(comparison, parameter);
-                        modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
-                    }
+                    modelBuilder.Entity(entityType.ClrType).HasQueryFilter(CreateTenantFilterExpression(entityType.ClrType));
                 }
             }
 
@@ -132,6 +122,15 @@ namespace CoreBackendApp.Infrastructure.Persistence
             });
 
             modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
+        }
+
+        private LambdaExpression CreateTenantFilterExpression(Type type)
+        {
+            var parameter = Expression.Parameter(type, "e");
+            var property = Expression.Property(parameter, nameof(ITenantEntity.TenantId));
+            var tenantIdProperty = Expression.Property(Expression.Constant(this), nameof(CurrentTenantId));
+            var comparison = Expression.Equal(property, tenantIdProperty);
+            return Expression.Lambda(comparison, parameter);
         }
     }
 }

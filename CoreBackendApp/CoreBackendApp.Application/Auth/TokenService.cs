@@ -58,8 +58,13 @@ namespace CoreBackendApp.Application.Auth
             return Convert.ToBase64String(randomBytes);
         }
 
-        public string GetHashToken(string token) => BCrypt.Net.BCrypt.HashPassword(token);
+        public string GetHashToken(string token)
+        {
+            using var sha256 = SHA256.Create();
+            var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(token));
+            return Convert.ToBase64String(hashBytes);
+        }
 
-        public bool VerifyToken(string token, string tokenHash) => BCrypt.Net.BCrypt.Verify(token, tokenHash);
+        public bool VerifyToken(string token, string tokenHash) => GetHashToken(token) == tokenHash;
     }
 }

@@ -1,11 +1,11 @@
 using CoreBackendApp.Application.Auth;
 using CoreBackendApp.Application.Interface;
-using CoreBackendApp.Domain.Entities;
 using CoreBackendApp.Api.Common.Validation;
+using CoreBackendApp.Api.Common.Extensions;
 
 namespace CoreBackendApp.Api.Endpoints;
 
-public static class AuthEndpoitns
+public static class AuthEndpoints
 {
     public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder endpointRouteBuilder)
     {
@@ -16,22 +16,31 @@ public static class AuthEndpoitns
             var ipAddress = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
             var result = await authService.LoginAsync(loginRequest.Email, loginRequest.Password, ipAddress);
-            return Results.Ok(result);
+            
+            return result.IsSuccess 
+                ? Results.Ok(result.Value) 
+                : result.ToProblemDetails();
         })
         .AddEndpointFilter<ValidationFilter<LoginRequest>>()
         .AllowAnonymous();
 
-        group.MapPost("/refresh", async (RefreshToken refreshToken, HttpContext httpContext, IAuthService authService) =>
+        group.MapPost("/refresh", async (RefreshTokenRequest refreshTokenRequest, HttpContext httpContext, IAuthService authService) =>
         {
             var ipAddress = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-            var result =  await authService.RefreshAsync(refreshToken.TokenHash, ipAddress);
-            return Results.Ok(result);
+            var result =  await authService.RefreshAsync(refreshTokenRequest.RefreshToken, ipAddress);
+            
+            return result.IsSuccess 
+                ? Results.Ok(result.Value) 
+                : result.ToProblemDetails();
         });
 
-        group.MapPost("/logout", async (RefreshToken refreshToken, IAuthService authService) =>
+        group.MapPost("/logout", async (RefreshTokenRequest refreshTokenRequest, IAuthService authService) =>
         {
-             await authService.LogoutAsync(refreshToken.TokenHash);
-            return Results.Ok();
+            var result = await authService.LogoutAsync(refreshTokenRequest.RefreshToken);
+            
+            return result.IsSuccess 
+                ? Results.Ok() 
+                : result.ToProblemDetails();
         });
 
         return endpointRouteBuilder;

@@ -2,6 +2,9 @@ using CoreBackendApp.Domain.Entities;
 using CoreBackendApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using CoreBackendApp.Api.Common.Validation;
+using CoreBackendApp.Application.Common.Models;
+using CoreBackendApp.Application.Users;
+using CoreBackendApp.Api.Common.Extensions;
 
 namespace CoreBackendApp.Api.Endpoints;
 
@@ -38,6 +41,11 @@ public static class UserEndpoints
             })
             .FirstOrDefaultAsync();
 
+            if (user == null)
+            {
+                return Result.Failure(UserErrors.NotFound).ToProblemDetails();
+            }
+
             return Results.Ok(user);
 
         });
@@ -46,7 +54,9 @@ public static class UserEndpoints
         {
             var tenantExists = await coreDbContext.Tenants.AnyAsync(t => t.Id == request.TenantId);
             if (!tenantExists)
-                return Results.BadRequest("Invalid Tenant");
+            {
+                return Result.Failure(UserErrors.InvalidTenant).ToProblemDetails();
+            }
 
             var user = User.Create(
                 request.Email, 
@@ -66,16 +76,21 @@ public static class UserEndpoints
         {
             var user = await coreDbContext.Users.Include(u => u.UserRoles).FirstOrDefaultAsync(u => u.Id == id);
             if (user == null)
-                return Results.NotFound("User not found");
+            {
+                return Result.Failure(UserErrors.NotFound).ToProblemDetails();
+            }
 
             var roleExists = await coreDbContext.Roles.AnyAsync(r => r.Id == roleId);
             if (!roleExists)
-                return Results.NotFound("Role not found");
+            {
+                return Result.Failure(UserErrors.RoleNotFound).ToProblemDetails();
+            }
 
             if (user.UserRoles.Any(ur => ur.RoleId == roleId))
-                return Results.BadRequest("User already has this role");
+            {
+                return Result.Failure(UserErrors.UserAlreadyHasRole).ToProblemDetails();
+            }
 
-            // Use the rich domain method
             user.AssignRole(roleId);
 
             await coreDbContext.SaveChangesAsync();

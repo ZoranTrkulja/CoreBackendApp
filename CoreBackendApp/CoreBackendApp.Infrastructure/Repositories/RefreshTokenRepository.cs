@@ -2,6 +2,8 @@ using CoreBackendApp.Application.Interface;
 using CoreBackendApp.Domain.Entities;
 using CoreBackendApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace CoreBackendApp.Infrastructure.Repositories
 {
@@ -19,18 +21,15 @@ namespace CoreBackendApp.Infrastructure.Repositories
         {
             return await _coreDbContext.RefreshTokens
                 .OrderByDescending(rt => rt.CreatedAt)
-                .FirstOrDefaultAsync(rt => rt.UserId == userId && rt.IsActive);
+                .FirstOrDefaultAsync(rt => rt.UserId == userId && rt.RevokedAt == null && rt.ExpiresAt > DateTime.UtcNow);
         }
 
         public async Task<RefreshToken?> GetByTokenAsync(string refreshToken)
         {
-            // Note: This is slow because it hashes every time. 
-            // In a real app, you'd find by UserId or an Id embedded in the token string itself.
-            var tokens = await _coreDbContext.RefreshTokens
-                .OrderByDescending(rt => rt.CreatedAt)
-                .ToListAsync();
+            var tokenHash = HashToken(refreshToken);
 
-            return tokens.FirstOrDefault(rt => BCrypt.Net.BCrypt.Verify(refreshToken, rt.TokenHash));
+            return await _coreDbContext.RefreshTokens
+                .FirstOrDefaultAsync(rt => rt.TokenHash == tokenHash);
         }
 
         public async Task RevokeAllForUserAsync(Guid userId)
@@ -50,6 +49,13 @@ namespace CoreBackendApp.Infrastructure.Repositories
         public async Task SaveChangesAsync()
         {
             await _coreDbContext.SaveChangesAsync();
+        }
+
+        private string HashToken(string token)
+        {
+            using var sha256 = SHA256.Create();
+            var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(token));
+            return Convert.ToBase64String(hashBytes);
         }
     }   
 }
