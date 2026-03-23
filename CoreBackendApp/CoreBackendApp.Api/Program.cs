@@ -3,6 +3,7 @@ using CoreBackendApp.Api.Middleware;
 using CoreBackendApp.Infrastructure.Services;
 using CoreBackendApp.Application.Auth;
 using CoreBackendApp.Application.Interface;
+using CoreBackendApp.Application.Services;
 using CoreBackendApp.Application.Common.Interfaces;
 using CoreBackendApp.Infrastructure.Persistence;
 using CoreBackendApp.Infrastructure.Repositories;
@@ -132,6 +133,7 @@ namespace CoreBackendApp.Api
                 });
 
                 builder.Services.AddScoped<IUserRepository, UserRepository>();
+                builder.Services.AddScoped<IUserService, UserService>();
                 builder.Services.AddScoped<TokenService>();
                 builder.Services.AddScoped<IAuthService, AuthService>();
                 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
