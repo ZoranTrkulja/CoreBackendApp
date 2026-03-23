@@ -9,6 +9,7 @@ namespace CoreBackendApp.Application.Services;
 public class UserService(
     IUserRepository userRepository, 
     ITenantRepository tenantRepository,
+    IRoleRepository roleRepository,
     IPasswordHasher passwordHasher) : IUserService
 {
     public async Task<IEnumerable<UserResponse>> GetAllAsync()
@@ -56,6 +57,16 @@ public class UserService(
         if (user == null)
         {
             return Result.Failure(UserErrors.NotFound);
+        }
+
+        if (!await roleRepository.ExistsAsync(roleId))
+        {
+            return Result.Failure(UserErrors.RoleNotFound);
+        }
+
+        if (user.UserRoles.Any(ur => ur.RoleId == roleId))
+        {
+            return Result.Failure(UserErrors.UserAlreadyHasRole);
         }
 
         user.AssignRole(roleId);

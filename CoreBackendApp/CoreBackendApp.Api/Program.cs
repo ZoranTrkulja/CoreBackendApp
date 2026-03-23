@@ -135,6 +135,7 @@ namespace CoreBackendApp.Api
 
                 builder.Services.AddScoped<IUserRepository, UserRepository>();
                 builder.Services.AddScoped<ITenantRepository, TenantRepository>();
+                builder.Services.AddScoped<IRoleRepository, RoleRepository>();
                 builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
                 builder.Services.AddScoped<IUserService, UserService>();
                 builder.Services.AddScoped<TokenService>();
