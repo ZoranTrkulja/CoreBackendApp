@@ -1,3 +1,4 @@
+using CoreBackendApp.Application.Common.Interfaces;
 using CoreBackendApp.Application.Common.Models;
 using CoreBackendApp.Application.Interface;
 using CoreBackendApp.Application.Users;
@@ -5,7 +6,10 @@ using CoreBackendApp.Domain.Entities;
 
 namespace CoreBackendApp.Application.Services;
 
-public class UserService(IUserRepository userRepository) : IUserService
+public class UserService(
+    IUserRepository userRepository, 
+    ITenantRepository tenantRepository,
+    IPasswordHasher passwordHasher) : IUserService
 {
     public async Task<IEnumerable<UserResponse>> GetAllAsync()
     {
@@ -26,11 +30,19 @@ public class UserService(IUserRepository userRepository) : IUserService
 
     public async Task<Result<Guid>> CreateAsync(CreateUserRequest request)
     {
-        // Note: Password hashing should ideally be in a separate service, 
-        // but keeping it here for consistency with the previous direct context usage.
+        if (!await tenantRepository.ExistsAsync(request.TenantId))
+        {
+            return Result.Failure<Guid>(UserErrors.InvalidTenant);
+        }
+
+        if (await userRepository.GetByEmailAsync(request.Email) != null)
+        {
+            return Result.Failure<Guid>(UserErrors.EmailAlreadyExists);
+        }
+
         var user = User.Create(
             request.Email,
-            BCrypt.Net.BCrypt.HashPassword(request.Password),
+            passwordHasher.HashPassword(request.Password),
             request.TenantId);
 
         await userRepository.AddAsync(user);

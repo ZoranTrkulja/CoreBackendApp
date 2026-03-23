@@ -1,10 +1,15 @@
 using CoreBackendApp.Application.Interface;
 using CoreBackendApp.Domain.Entities;
 using CoreBackendApp.Application.Common.Models;
+using CoreBackendApp.Application.Common.Interfaces;
 
 namespace CoreBackendApp.Application.Auth;
 
-public class AuthService(IUserRepository userRepository, TokenService tokenService, IRefreshTokenRepository refreshTokenRepository) : IAuthService
+public class AuthService(
+    IUserRepository userRepository, 
+    TokenService tokenService, 
+    IRefreshTokenRepository refreshTokenRepository,
+    IPasswordHasher passwordHasher) : IAuthService
 {
     private readonly IUserRepository _userRepository = userRepository;
     private readonly TokenService _tokenService = tokenService;
@@ -14,7 +19,7 @@ public class AuthService(IUserRepository userRepository, TokenService tokenServi
     {
         var user = await _userRepository.GetByEmailAsync(email);
 
-        if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+        if (user == null || !passwordHasher.VerifyPassword(password, user.PasswordHash))
         {
             return Result.Failure<LoginResponse>(AuthErrors.InvalidCredentials);
         }

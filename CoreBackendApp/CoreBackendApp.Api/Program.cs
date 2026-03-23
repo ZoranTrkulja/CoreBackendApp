@@ -7,6 +7,7 @@ using CoreBackendApp.Application.Services;
 using CoreBackendApp.Application.Common.Interfaces;
 using CoreBackendApp.Infrastructure.Persistence;
 using CoreBackendApp.Infrastructure.Repositories;
+using CoreBackendApp.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -133,6 +134,8 @@ namespace CoreBackendApp.Api
                 });
 
                 builder.Services.AddScoped<IUserRepository, UserRepository>();
+                builder.Services.AddScoped<ITenantRepository, TenantRepository>();
+                builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
                 builder.Services.AddScoped<IUserService, UserService>();
                 builder.Services.AddScoped<TokenService>();
                 builder.Services.AddScoped<IAuthService, AuthService>();
