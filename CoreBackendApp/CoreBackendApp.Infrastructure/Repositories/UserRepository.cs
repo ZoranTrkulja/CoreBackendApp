@@ -63,15 +63,9 @@ namespace CoreBackendApp.Infrastructure.Repositories
             }
 
             var count = await query.CountAsync();
-            var items = await query
+            var items = await ProjectToUserResponse(query)
                 .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
                 .Take(paginationParams.PageSize)
-                .Select(u => new UserResponse(
-                    u.Id, 
-                    u.Email, 
-                    u.TenantId,
-                    u.UserRoles.Select(ur => ur.Role.Name)
-                ))
                 .ToListAsync();
 
             return new PagedList<UserResponse>(items, count, paginationParams.PageNumber, paginationParams.PageSize);
@@ -79,15 +73,18 @@ namespace CoreBackendApp.Infrastructure.Repositories
 
         public async Task<UserResponse?> GetByIdWithRolesAsync(Guid userId)
         {
-            return await _coreDbContext.Users
-                .Where(u => u.Id == userId)
-                .Select(u => new UserResponse(
-                    u.Id,
-                    u.Email,
-                    u.TenantId,
-                    u.UserRoles.Select(ur => ur.Role.Name)
-                ))
+            return await ProjectToUserResponse(_coreDbContext.Users.Where(u => u.Id == userId))
                 .FirstOrDefaultAsync();
+        }
+
+        private static IQueryable<UserResponse> ProjectToUserResponse(IQueryable<User> query)
+        {
+            return query.Select(u => new UserResponse(
+                u.Id,
+                u.Email,
+                u.TenantId,
+                u.UserRoles.Select(ur => ur.Role.Name)
+            ));
         }
 
         public async Task AddAsync(User user)
