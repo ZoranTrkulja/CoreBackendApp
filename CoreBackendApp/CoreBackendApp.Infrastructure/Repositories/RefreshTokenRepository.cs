@@ -20,6 +20,7 @@ namespace CoreBackendApp.Infrastructure.Repositories
         public async Task<RefreshToken?> GetActiveByUserIdAsync(Guid userId)
         {
             return await _coreDbContext.RefreshTokens
+                .IgnoreQueryFilters()
                 .OrderByDescending(rt => rt.CreatedAt)
                 .FirstOrDefaultAsync(rt => rt.UserId == userId && rt.RevokedAt == null && rt.ExpiresAt > DateTime.UtcNow);
         }
@@ -29,12 +30,14 @@ namespace CoreBackendApp.Infrastructure.Repositories
             var tokenHash = HashToken(refreshToken);
 
             return await _coreDbContext.RefreshTokens
+                .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(rt => rt.TokenHash == tokenHash);
         }
 
         public async Task RevokeAllForUserAsync(Guid userId)
         {
             var activeTokens = await _coreDbContext.RefreshTokens
+                .IgnoreQueryFilters()
                 .Where(rt => rt.UserId == userId && rt.RevokedAt == null)
                 .ToListAsync();
 

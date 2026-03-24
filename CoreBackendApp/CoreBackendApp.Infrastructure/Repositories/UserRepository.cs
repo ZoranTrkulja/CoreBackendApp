@@ -14,6 +14,7 @@ namespace CoreBackendApp.Infrastructure.Repositories
         public async Task<User?> GetByIdAsync(Guid userId)
         {
             return await _coreDbContext.Users
+                .IgnoreQueryFilters()
                 .Include(u => u.UserRoles)
                 .FirstOrDefaultAsync(u => u.Id == userId);
         }
@@ -21,12 +22,14 @@ namespace CoreBackendApp.Infrastructure.Repositories
         public async Task<User?> GetByEmailAsync(string email)
         {
             return await _coreDbContext.Users
+                .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
 
         public async Task<IEnumerable<string>> GetRolesAsync(Guid userId)
         {
             return await _coreDbContext.UserRoles
+                .IgnoreQueryFilters()
                 .Where(ur => ur.UserId == userId)
                 .Select(ur => ur.Role.Name)
                 .ToListAsync();
@@ -35,6 +38,7 @@ namespace CoreBackendApp.Infrastructure.Repositories
         public async Task<IEnumerable<string>> GetPermissionsAsync(Guid userId)
         {
             return await _coreDbContext.UserRoles
+                .IgnoreQueryFilters()
                 .Where(ur => ur.UserId == userId)
                 .SelectMany(ur => ur.Role.RolePermissions)
                 .Select(rp => rp.Permission.Code)
@@ -44,10 +48,14 @@ namespace CoreBackendApp.Infrastructure.Repositories
 
         public async Task<IEnumerable<string>> GetFeaturesAsync(Guid userId)
         {
-            var user = await _coreDbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var user = await _coreDbContext.Users
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(u => u.Id == userId);
+            
             if (user == null) return Enumerable.Empty<string>();
 
             return await _coreDbContext.TenantFeatures
+                .IgnoreQueryFilters()
                 .Where(tf => tf.TenantId == user.TenantId)
                 .Select(tf => tf.Feature.Key)
                 .ToListAsync();
