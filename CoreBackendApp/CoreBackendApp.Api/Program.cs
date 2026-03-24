@@ -8,6 +8,9 @@ using CoreBackendApp.Application.Common.Interfaces;
 using CoreBackendApp.Infrastructure.Persistence;
 using CoreBackendApp.Infrastructure.Repositories;
 using CoreBackendApp.Infrastructure.Identity;
+using CoreBackendApp.Api.Common;
+using Mapster;
+using MapsterMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -37,6 +40,7 @@ namespace CoreBackendApp.Api
             try
             {
                 Log.Information("Starting web host");
+                MapsterConfig.RegisterMappings();
                 var builder = WebApplication.CreateBuilder(args);
 
                 builder.Host.UseSerilog();

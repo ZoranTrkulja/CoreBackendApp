@@ -4,6 +4,7 @@ using CoreBackendApp.Application.Common.Models;
 using CoreBackendApp.Domain.Entities;
 using CoreBackendApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Mapster;
 
 namespace CoreBackendApp.Infrastructure.Repositories
 {
@@ -71,7 +72,8 @@ namespace CoreBackendApp.Infrastructure.Repositories
             }
 
             var count = await query.CountAsync();
-            var items = await ProjectToUserResponse(query)
+            var items = await query
+                .ProjectToType<UserResponse>()
                 .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
                 .Take(paginationParams.PageSize)
                 .ToListAsync();
@@ -81,18 +83,10 @@ namespace CoreBackendApp.Infrastructure.Repositories
 
         public async Task<UserResponse?> GetByIdWithRolesAsync(Guid userId)
         {
-            return await ProjectToUserResponse(_coreDbContext.Users.Where(u => u.Id == userId))
+            return await _coreDbContext.Users
+                .Where(u => u.Id == userId)
+                .ProjectToType<UserResponse>()
                 .FirstOrDefaultAsync();
-        }
-
-        private static IQueryable<UserResponse> ProjectToUserResponse(IQueryable<User> query)
-        {
-            return query.Select(u => new UserResponse(
-                u.Id,
-                u.Email,
-                u.TenantId,
-                u.UserRoles.Select(ur => ur.Role.Name)
-            ));
         }
 
         public async Task AddAsync(User user)
