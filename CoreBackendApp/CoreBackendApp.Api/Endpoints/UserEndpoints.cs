@@ -12,9 +12,9 @@ public static class UserEndpoints
     {
         var group = endpointRouteBuilder.MapGroup("users").WithTags("Users");
 
-        group.MapGet("/", async (IUserService userService) =>
+        group.MapGet("/", async ([AsParameters] PaginationParams paginationParams, IUserService userService) =>
         {
-            var users = await userService.GetAllAsync();
+            var users = await userService.GetAllAsync(paginationParams);
             return Results.Ok(users);
         });
 

@@ -1,5 +1,6 @@
 using CoreBackendApp.Application.Interface;
 using CoreBackendApp.Application.Users;
+using CoreBackendApp.Application.Common.Models;
 using CoreBackendApp.Domain.Entities;
 using CoreBackendApp.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -52,9 +53,19 @@ namespace CoreBackendApp.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<UserResponse>> GetAllWithRolesAsync()
+        public async Task<PagedList<UserResponse>> GetAllWithRolesAsync(PaginationParams paginationParams)
         {
-            return await _coreDbContext.Users
+            var query = _coreDbContext.Users.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(paginationParams.SearchTerm))
+            {
+                query = query.Where(u => u.Email.Contains(paginationParams.SearchTerm));
+            }
+
+            var count = await query.CountAsync();
+            var items = await query
+                .Skip((paginationParams.PageNumber - 1) * paginationParams.PageSize)
+                .Take(paginationParams.PageSize)
                 .Select(u => new UserResponse(
                     u.Id, 
                     u.Email, 
@@ -62,6 +73,8 @@ namespace CoreBackendApp.Infrastructure.Repositories
                     u.UserRoles.Select(ur => ur.Role.Name)
                 ))
                 .ToListAsync();
+
+            return new PagedList<UserResponse>(items, count, paginationParams.PageNumber, paginationParams.PageSize);
         }
 
         public async Task<UserResponse?> GetByIdWithRolesAsync(Guid userId)

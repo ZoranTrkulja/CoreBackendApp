@@ -12,9 +12,9 @@ public class UserService(
     IRoleRepository roleRepository,
     IPasswordHasher passwordHasher) : IUserService
 {
-    public async Task<IEnumerable<UserResponse>> GetAllAsync()
+    public async Task<PagedList<UserResponse>> GetAllAsync(PaginationParams paginationParams)
     {
-        return await userRepository.GetAllWithRolesAsync();
+        return await userRepository.GetAllWithRolesAsync(paginationParams);
     }
 
     public async Task<Result<UserResponse>> GetByIdAsync(Guid id)
