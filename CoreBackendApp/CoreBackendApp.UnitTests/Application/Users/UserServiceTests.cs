@@ -4,6 +4,7 @@ using CoreBackendApp.Application.Interface;
 using CoreBackendApp.Application.Services;
 using CoreBackendApp.Application.Users;
 using CoreBackendApp.Domain.Entities;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -15,6 +16,7 @@ public class UserServiceTests
     private readonly Mock<ITenantRepository> _tenantRepositoryMock;
     private readonly Mock<IRoleRepository> _roleRepositoryMock;
     private readonly Mock<IPasswordHasher> _passwordHasherMock;
+    private readonly Mock<ILogger<UserService>> _loggerMock;
     private readonly UserService _sut;
 
     public UserServiceTests()
@@ -23,12 +25,14 @@ public class UserServiceTests
         _tenantRepositoryMock = new Mock<ITenantRepository>();
         _roleRepositoryMock = new Mock<IRoleRepository>();
         _passwordHasherMock = new Mock<IPasswordHasher>();
+        _loggerMock = new Mock<ILogger<UserService>>();
 
         _sut = new UserService(
             _userRepositoryMock.Object,
             _tenantRepositoryMock.Object,
             _roleRepositoryMock.Object,
-            _passwordHasherMock.Object);
+            _passwordHasherMock.Object,
+            _loggerMock.Object);
     }
 
     [Fact]
