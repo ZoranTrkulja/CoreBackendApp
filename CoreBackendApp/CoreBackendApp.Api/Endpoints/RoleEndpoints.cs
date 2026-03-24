@@ -8,7 +8,7 @@ public static class RoleEndpoints
 {
     public static IEndpointRouteBuilder MapRoleEndpoint(this IEndpointRouteBuilder endpointRouteBuilder)
     {
-        var group = endpointRouteBuilder.MapGroup("roles").WithTags("Roles").RequireAuthorization();
+        var group = endpointRouteBuilder.MapGroup("roles").WithTags("Roles").RequireAuthorization("roles.read");
 
         group.MapGet("/", async (CoreDbContext coreDbContext) =>
         {

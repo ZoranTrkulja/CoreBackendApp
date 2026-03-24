@@ -17,7 +17,12 @@ namespace CoreBackendApp.Infrastructure.Persistence
                     new Permission { Id = Guid.NewGuid(), Code = "roles.read", Description = "Read roles", CreatedAt = DateTime.UtcNow },
                     new Permission { Id = Guid.NewGuid(), Code = "roles.manage", Description = "Manage roles", CreatedAt = DateTime.UtcNow },
 
-                    new Permission { Id = Guid.NewGuid(), Code = "features.read", Description = "Read features", CreatedAt = DateTime.UtcNow }
+                    new Permission { Id = Guid.NewGuid(), Code = "permissions.read", Description = "Read permissions", CreatedAt = DateTime.UtcNow },
+
+                    new Permission { Id = Guid.NewGuid(), Code = "features.read", Description = "Read features", CreatedAt = DateTime.UtcNow },
+
+                    new Permission { Id = Guid.NewGuid(), Code = "tenants.read", Description = "Read tenants", CreatedAt = DateTime.UtcNow },
+                    new Permission { Id = Guid.NewGuid(), Code = "tenants.manage", Description = "Manage tenants", CreatedAt = DateTime.UtcNow }
                 };
 
 

@@ -7,7 +7,7 @@ public static class PermissionEndpoints
 {
     public static IEndpointRouteBuilder MapPermissionEndpoint(this IEndpointRouteBuilder endpointRouteBuilder)
     {
-        var group = endpointRouteBuilder.MapGroup("permissions").WithTags("Permissions").RequireAuthorization();
+        var group = endpointRouteBuilder.MapGroup("permissions").WithTags("Permissions").RequireAuthorization("permissions.read");
 
         group.MapGet("/", async (CoreDbContext coreDbContext) =>
         {

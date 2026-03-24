@@ -7,7 +7,7 @@ public static class TenantEndpoints
 {
     public static IEndpointRouteBuilder MapTenantEndpoint(this IEndpointRouteBuilder endpointRouteBuilder)
     {
-        var group = endpointRouteBuilder.MapGroup("tenants").WithTags("Tenants").RequireAuthorization();
+        var group = endpointRouteBuilder.MapGroup("tenants").WithTags("Tenants").RequireAuthorization("tenants.read");
         group.MapGet("/", async (CoreDbContext coreDbContext) =>
         {
             var tenants = await coreDbContext.Tenants

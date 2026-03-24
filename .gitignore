@@ -25,6 +25,7 @@ x86/
 
 # Logs
 *.log
+logs/
 
 # Test results
 TestResults/

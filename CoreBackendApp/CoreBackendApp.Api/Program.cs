@@ -1,24 +1,24 @@
+using CoreBackendApp.Api.Authorization;
+using CoreBackendApp.Api.Common;
 using CoreBackendApp.Api.Endpoints;
 using CoreBackendApp.Api.Middleware;
-using CoreBackendApp.Infrastructure.Services;
 using CoreBackendApp.Application.Auth;
+using CoreBackendApp.Application.Common.Interfaces;
 using CoreBackendApp.Application.Interface;
 using CoreBackendApp.Application.Services;
-using CoreBackendApp.Application.Common.Interfaces;
+using CoreBackendApp.Infrastructure.Identity;
 using CoreBackendApp.Infrastructure.Persistence;
 using CoreBackendApp.Infrastructure.Repositories;
-using CoreBackendApp.Infrastructure.Identity;
-using CoreBackendApp.Api.Common;
-using Mapster;
-using MapsterMapper;
+using CoreBackendApp.Infrastructure.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
-using FluentValidation;
 using Serilog;
 using Serilog.Events;
+using System.Text;
 
 namespace CoreBackendApp.Api
 {
@@ -129,13 +129,9 @@ namespace CoreBackendApp.Api
                         };
                     });
 
-                builder.Services.AddAuthorization(options =>
-                {
-                    options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
-                    options.AddPolicy("RequireUsersReadPermission", policy => policy.RequireClaim("permissions", "users.read"));
-                    options.AddPolicy("RequireUsersManagePermission", policy => policy.RequireClaim("permissions", "users.manage"));
-                    options.AddPolicy("RequireUsersFeature", policy => policy.RequireClaim("features", "users"));
-                });
+                builder.Services.AddAuthorization();
+                builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+                builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
                 builder.Services.AddScoped<IUserRepository, UserRepository>();
                 builder.Services.AddScoped<ITenantRepository, TenantRepository>();

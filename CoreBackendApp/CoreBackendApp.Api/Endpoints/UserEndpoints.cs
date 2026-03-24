@@ -16,7 +16,8 @@ public static class UserEndpoints
         {
             var users = await userService.GetAllAsync(paginationParams);
             return Results.Ok(users);
-        });
+        })
+        .RequireAuthorization("user.read");
 
         group.MapGet("/{id:guid}", async (Guid id, IUserService userService) =>
         {
@@ -25,7 +26,8 @@ public static class UserEndpoints
             return result.IsSuccess 
                 ? Results.Ok(result.Value) 
                 : result.ToProblemDetails();
-        });
+        })
+        .RequireAuthorization("user.read");
 
         group.MapPost("/", async (CreateUserRequest request, IUserService userService) =>
         {
@@ -36,7 +38,7 @@ public static class UserEndpoints
                 : result.ToProblemDetails();
         })
         .AddEndpointFilter<ValidationFilter<CreateUserRequest>>()
-        .RequireAuthorization("RequireUsersManagePermission");
+        .RequireAuthorization("user.create");
 
 
         group.MapPost("/{id:guid}/assign-role/{roleId:guid}", async (Guid id, Guid roleId, IUserService userService) =>
@@ -47,7 +49,7 @@ public static class UserEndpoints
                 ? Results.Ok("Role assigned to user successfully") 
                 : result.ToProblemDetails();
         })
-       .RequireAuthorization("RequireUsersManagePermission");
+       .RequireAuthorization("user.manage");
 
         group.MapDelete("/{id:guid}", async (Guid id, IUserService userService) =>
         {
@@ -57,7 +59,7 @@ public static class UserEndpoints
                 ? Results.NoContent()
                 : result.ToProblemDetails();
         })
-        .RequireAuthorization("RequireUsersManagePermission");
+        .RequireAuthorization("user.manage");
 
         return endpointRouteBuilder;
     }

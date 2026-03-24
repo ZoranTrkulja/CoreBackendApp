@@ -7,7 +7,7 @@ public static class FeatureEndpoints
 {
     public static IEndpointRouteBuilder MapFeatureEndpoint(this IEndpointRouteBuilder endpointRouteBuilder)
     {
-        var group = endpointRouteBuilder.MapGroup("features").WithTags("Features").RequireAuthorization();
+        var group = endpointRouteBuilder.MapGroup("features").WithTags("Features").RequireAuthorization("features.read");
 
         group.MapGet("/", async (CoreDbContext coreDbContext) =>
         {
