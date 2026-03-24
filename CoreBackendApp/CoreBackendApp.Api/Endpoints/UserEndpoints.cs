@@ -49,6 +49,16 @@ public static class UserEndpoints
         })
        .RequireAuthorization("RequireUsersManagePermission");
 
+        group.MapDelete("/{id:guid}", async (Guid id, IUserService userService) =>
+        {
+            var result = await userService.DeleteAsync(id);
+
+            return result.IsSuccess
+                ? Results.NoContent()
+                : result.ToProblemDetails();
+        })
+        .RequireAuthorization("RequireUsersManagePermission");
+
         return endpointRouteBuilder;
     }
 }

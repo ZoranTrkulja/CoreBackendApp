@@ -1,9 +1,11 @@
+using CoreBackendApp.Domain.Common;
 using CoreBackendApp.Application.Common.Interfaces;
 using CoreBackendApp.Domain.Entities;
 using CoreBackendApp.Domain.Interfaces;
 using CoreBackendApp.Infrastructure.Configurations;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace CoreBackendApp.Infrastructure.Persistence
 {
@@ -39,9 +41,13 @@ namespace CoreBackendApp.Infrastructure.Persistence
 
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
-                if (typeof(ITenantEntity).IsAssignableFrom(entityType.ClrType))
+                var isBaseEntity = typeof(BaseEntity).IsAssignableFrom(entityType.ClrType);
+                var isTenantEntity = typeof(ITenantEntity).IsAssignableFrom(entityType.ClrType);
+
+                if (isBaseEntity || isTenantEntity)
                 {
-                    modelBuilder.Entity(entityType.ClrType).HasQueryFilter(CreateTenantFilterExpression(entityType.ClrType));
+                    var filterExpression = CreateCombinedFilterExpression(entityType.ClrType, isBaseEntity, isTenantEntity);
+                    modelBuilder.Entity(entityType.ClrType).HasQueryFilter(filterExpression);
                 }
             }
 
@@ -124,13 +130,30 @@ namespace CoreBackendApp.Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
         }
 
-        private LambdaExpression CreateTenantFilterExpression(Type type)
+        private LambdaExpression CreateCombinedFilterExpression(Type type, bool isBaseEntity, bool isTenantEntity)
         {
             var parameter = Expression.Parameter(type, "e");
-            var property = Expression.Property(parameter, nameof(ITenantEntity.TenantId));
-            var tenantIdProperty = Expression.Property(Expression.Constant(this), nameof(CurrentTenantId));
-            var comparison = Expression.Equal(property, tenantIdProperty);
-            return Expression.Lambda(comparison, parameter);
+            Expression? combinedExpression = null;
+
+            if (isBaseEntity)
+            {
+                var isDeletedProperty = Expression.Property(parameter, nameof(BaseEntity.IsDeleted));
+                var isDeletedFalse = Expression.Constant(false);
+                combinedExpression = Expression.Equal(isDeletedProperty, isDeletedFalse);
+            }
+
+            if (isTenantEntity)
+            {
+                var tenantIdProperty = Expression.Property(parameter, nameof(ITenantEntity.TenantId));
+                var currentTenantIdProperty = Expression.Property(Expression.Constant(this), nameof(CurrentTenantId));
+                var tenantFilter = Expression.Equal(tenantIdProperty, currentTenantIdProperty);
+
+                combinedExpression = combinedExpression == null 
+                    ? tenantFilter 
+                    : Expression.AndAlso(combinedExpression, tenantFilter);
+            }
+
+            return Expression.Lambda(combinedExpression!, parameter);
         }
     }
 }

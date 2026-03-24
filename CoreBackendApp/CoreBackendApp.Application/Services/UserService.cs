@@ -89,4 +89,19 @@ public class UserService(
 
         return Result.Success();
     }
+
+    public async Task<Result> DeleteAsync(Guid id)
+    {
+        var user = await userRepository.GetByIdAsync(id);
+        if (user == null)
+        {
+            logger.LogWarning("Delete failed: User {UserId} not found", id);
+            return Result.Failure(UserErrors.NotFound);
+        }
+
+        await userRepository.Delete(user);
+        logger.LogInformation("User {UserId} soft-deleted successfully", id);
+
+        return Result.Success();
+    }
 }

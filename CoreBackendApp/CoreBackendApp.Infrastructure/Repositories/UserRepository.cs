@@ -100,5 +100,11 @@ namespace CoreBackendApp.Infrastructure.Repositories
             _coreDbContext.Users.Update(user);
             await _coreDbContext.SaveChangesAsync();
         }
+
+        public async Task Delete(User user)
+        {
+            user.SoftDelete();
+            await UpdateAsync(user);
+        }
     }
 }

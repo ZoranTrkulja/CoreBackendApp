@@ -204,4 +204,35 @@ public class UserServiceTests
         Assert.True(result.IsFailure);
         Assert.Equal(UserErrors.UserAlreadyHasRole, result.Error);
     }
+
+    [Fact]
+    public async Task DeleteAsync_UserExists_ShouldReturnSuccess()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var user = User.Create("test@example.com", "hash", Guid.NewGuid());
+        _userRepositoryMock.Setup(x => x.GetByIdAsync(userId)).ReturnsAsync(user);
+
+        // Act
+        var result = await _sut.DeleteAsync(userId);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        _userRepositoryMock.Verify(x => x.Delete(user), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_UserNotFound_ShouldReturnFailure()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        _userRepositoryMock.Setup(x => x.GetByIdAsync(userId)).ReturnsAsync((User?)null);
+
+        // Act
+        var result = await _sut.DeleteAsync(userId);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal(UserErrors.NotFound, result.Error);
+    }
 }

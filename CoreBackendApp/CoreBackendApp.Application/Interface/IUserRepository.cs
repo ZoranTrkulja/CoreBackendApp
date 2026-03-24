@@ -16,5 +16,6 @@ namespace CoreBackendApp.Application.Interface
         Task<UserResponse?> GetByIdWithRolesAsync(Guid userId);
         Task AddAsync(User user);
         Task UpdateAsync(User user);
+        Task Delete(User user);
     }
 }
