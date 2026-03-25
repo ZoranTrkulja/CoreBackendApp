@@ -20,7 +20,7 @@ CoreBackendApp is a modular monolith built on .NET 10, designed to be a central 
 1. **Clean Architecture:** Maintain strict separation of concerns between layers. Do not reference `Infrastructure` or `Api` from `Domain` or `Application`.
 2. **DTOs:** Always use `public record` for Request and Response models in the `Application` layer.
 3. **Minimal APIs:** Prefer Minimal APIs for new endpoints, organized into separate classes/files (e.g., in `Endpoints/` folder).
-4. **Authentication:** Ensure all new sensitive endpoints are protected by appropriate policies (e.g., `.RequireAuthorization("RequireUsersManagePermission")`).
+4. **Authentication:** Ensure all new sensitive endpoints are protected by appropriate granular permissions (e.g., `.RequireAuthorization("user.manage")`). Use `HasPermissionAttribute` for controllers if applicable.
 5. **EF Core:** Use Migrations for any database changes. Ensure entities inherit from `BaseEntity` where applicable.
 6. **Code Style:** Follow standard C# and .NET 10 conventions. Use implicit usings and file-scoped namespaces.
 
