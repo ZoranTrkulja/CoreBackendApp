@@ -21,6 +21,7 @@ namespace CoreBackendApp.Infrastructure.Repositories
         {
             return await _coreDbContext.RefreshTokens
                 .IgnoreQueryFilters()
+                .AsNoTracking()
                 .OrderByDescending(rt => rt.CreatedAt)
                 .FirstOrDefaultAsync(rt => rt.UserId == userId && rt.RevokedAt == null && rt.ExpiresAt > DateTime.UtcNow);
         }
@@ -36,17 +37,10 @@ namespace CoreBackendApp.Infrastructure.Repositories
 
         public async Task RevokeAllForUserAsync(Guid userId)
         {
-            var activeTokens = await _coreDbContext.RefreshTokens
+            await _coreDbContext.RefreshTokens
                 .IgnoreQueryFilters()
                 .Where(rt => rt.UserId == userId && rt.RevokedAt == null)
-                .ToListAsync();
-
-            foreach (var token in activeTokens)
-            {
-                token.RevokedAt = DateTime.UtcNow;
-            }
-
-            await SaveChangesAsync();
+                .ExecuteUpdateAsync(s => s.SetProperty(rt => rt.RevokedAt, DateTime.UtcNow));
         }
 
         public async Task SaveChangesAsync()

@@ -17,25 +17,28 @@ public class AuthService(
 
     public async Task<Result<LoginResponse>> LoginAsync(string email, string password, string ipAddress)
     {
-        var user = await _userRepository.GetByEmailAsync(email);
+        var authDetails = await _userRepository.GetAuthDetailsAsync(email);
 
-        if (user == null || !passwordHasher.VerifyPassword(password, user.PasswordHash))
+        if (authDetails == null || !passwordHasher.VerifyPassword(password, authDetails.PasswordHash))
         {
             return Result.Failure<LoginResponse>(AuthErrors.InvalidCredentials);
         }
 
-        var roles = await _userRepository.GetRolesAsync(user.Id);
-        var permissions = await _userRepository.GetPermissionsAsync(user.Id);
-        var features = await _userRepository.GetFeaturesAsync(user.Id);
+        var accessToken = _tokenService.GenerateAccessToken(
+            authDetails.UserId, 
+            authDetails.Email, 
+            authDetails.TenantId, 
+            authDetails.Roles, 
+            authDetails.Permissions, 
+            authDetails.Features);
 
-        var accessToken = _tokenService.GenerateAccessToken(user, roles, permissions, features);
         var refreshToken = _tokenService.GenerateRefreshToken();
         var tokenHash = _tokenService.GetHashToken(refreshToken);
 
         await _refreshTokenRepository.AddAsync(new RefreshToken
         {
             Id = Guid.NewGuid(),
-            UserId = user.Id,
+            UserId = authDetails.UserId,
             TokenHash = tokenHash,
             CreatedAt = DateTime.UtcNow,
             ExpiresAt = DateTime.UtcNow.AddDays(7),
@@ -66,8 +69,8 @@ public class AuthService(
             return Result.Failure<LoginResponse>(AuthErrors.TokenExpired);
         }
 
-        var user = await _userRepository.GetByIdAsync(existingToken.UserId);
-        if (user == null)
+        var authDetails = await _userRepository.GetAuthDetailsByIdAsync(existingToken.UserId);
+        if (authDetails == null)
         {
             return Result.Failure<LoginResponse>(AuthErrors.UserNotFound);
         }
@@ -83,7 +86,7 @@ public class AuthService(
         await _refreshTokenRepository.AddAsync(new RefreshToken
         {
             Id = Guid.NewGuid(),
-            UserId = user.Id,
+            UserId = authDetails.UserId,
             TokenHash = newTokenHash,
             CreatedAt = DateTime.UtcNow,
             ExpiresAt = DateTime.UtcNow.AddDays(7),
@@ -92,11 +95,13 @@ public class AuthService(
 
         await _refreshTokenRepository.SaveChangesAsync();
 
-        var roles = await _userRepository.GetRolesAsync(user.Id);
-        var permissions = await _userRepository.GetPermissionsAsync(user.Id);
-        var features = await _userRepository.GetFeaturesAsync(user.Id);
-
-        var accessToken = _tokenService.GenerateAccessToken(user, roles, permissions, features);
+        var accessToken = _tokenService.GenerateAccessToken(
+            authDetails.UserId, 
+            authDetails.Email, 
+            authDetails.TenantId, 
+            authDetails.Roles, 
+            authDetails.Permissions, 
+            authDetails.Features);
 
         return new LoginResponse(accessToken, newRefreshToken);
     }

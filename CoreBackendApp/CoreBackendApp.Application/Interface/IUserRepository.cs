@@ -1,3 +1,4 @@
+using CoreBackendApp.Application.Auth;
 using CoreBackendApp.Application.Common.Models;
 using CoreBackendApp.Application.Users;
 using CoreBackendApp.Domain.Entities;
@@ -6,6 +7,8 @@ namespace CoreBackendApp.Application.Interface
 {
     public interface IUserRepository
     {
+        Task<AuthDetails?> GetAuthDetailsAsync(string email);
+        Task<AuthDetails?> GetAuthDetailsByIdAsync(Guid userId);
         Task<User?> GetByIdAsync(Guid userId);
         Task<User?> GetByEmailAsync(string email);
         Task<IEnumerable<string>> GetRolesAsync(Guid userId);

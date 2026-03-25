@@ -1,16 +1,59 @@
+using CoreBackendApp.Application.Auth;
+using CoreBackendApp.Application.Common.Models;
 using CoreBackendApp.Application.Interface;
 using CoreBackendApp.Application.Users;
-using CoreBackendApp.Application.Common.Models;
 using CoreBackendApp.Domain.Entities;
 using CoreBackendApp.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
 using Mapster;
+using Microsoft.EntityFrameworkCore;
 
 namespace CoreBackendApp.Infrastructure.Repositories
 {
     public class UserRepository(CoreDbContext coreDbContext) : IUserRepository
     {
         private readonly CoreDbContext _coreDbContext = coreDbContext;
+
+        public async Task<AuthDetails?> GetAuthDetailsAsync(string email)
+        {
+            return await _coreDbContext.Users
+                .IgnoreQueryFilters()
+                .Where(u => u.Email == email && !u.IsDeleted)
+                .Select(u => new AuthDetails(
+                    u.Id,
+                    u.Email,
+                    u.PasswordHash,
+                    u.TenantId,
+                    u.UserRoles.Select(ur => ur.Role.Name).ToList(),
+                    u.UserRoles.SelectMany(ur => ur.Role.RolePermissions).Select(rp => rp.Permission.Code).Distinct().ToList(),
+                    _coreDbContext.TenantFeatures
+                        .Where(tf => tf.TenantId == u.TenantId)
+                        .Select(tf => tf.Feature.Key)
+                        .ToList()
+                ))
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<AuthDetails?> GetAuthDetailsByIdAsync(Guid userId)
+        {
+            return await _coreDbContext.Users
+                .IgnoreQueryFilters()
+                .Where(u => u.Id == userId && !u.IsDeleted)
+                .Select(u => new AuthDetails(
+                    u.Id,
+                    u.Email,
+                    u.PasswordHash,
+                    u.TenantId,
+                    u.UserRoles.Select(ur => ur.Role.Name).ToList(),
+                    u.UserRoles.SelectMany(ur => ur.Role.RolePermissions).Select(rp => rp.Permission.Code).Distinct().ToList(),
+                    _coreDbContext.TenantFeatures
+                        .Where(tf => tf.TenantId == u.TenantId)
+                        .Select(tf => tf.Feature.Key)
+                        .ToList()
+                ))
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
 
         public async Task<User?> GetByIdAsync(Guid userId)
         {
@@ -31,6 +74,7 @@ namespace CoreBackendApp.Infrastructure.Repositories
         {
             return await _coreDbContext.UserRoles
                 .IgnoreQueryFilters()
+                .AsNoTracking()
                 .Where(ur => ur.UserId == userId)
                 .Select(ur => ur.Role.Name)
                 .ToListAsync();
@@ -40,6 +84,7 @@ namespace CoreBackendApp.Infrastructure.Repositories
         {
             return await _coreDbContext.UserRoles
                 .IgnoreQueryFilters()
+                .AsNoTracking()
                 .Where(ur => ur.UserId == userId)
                 .SelectMany(ur => ur.Role.RolePermissions)
                 .Select(rp => rp.Permission.Code)
@@ -49,22 +94,26 @@ namespace CoreBackendApp.Infrastructure.Repositories
 
         public async Task<IEnumerable<string>> GetFeaturesAsync(Guid userId)
         {
-            var user = await _coreDbContext.Users
+            var tenantId = await _coreDbContext.Users
                 .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(u => u.Id == userId);
+                .AsNoTracking()
+                .Where(u => u.Id == userId)
+                .Select(u => u.TenantId)
+                .FirstOrDefaultAsync();
             
-            if (user == null) return Enumerable.Empty<string>();
+            if (tenantId == Guid.Empty) return Enumerable.Empty<string>();
 
             return await _coreDbContext.TenantFeatures
                 .IgnoreQueryFilters()
-                .Where(tf => tf.TenantId == user.TenantId)
+                .AsNoTracking()
+                .Where(tf => tf.TenantId == tenantId)
                 .Select(tf => tf.Feature.Key)
                 .ToListAsync();
         }
 
         public async Task<PagedList<UserResponse>> GetAllWithRolesAsync(PaginationParams paginationParams)
         {
-            var query = _coreDbContext.Users.AsQueryable();
+            var query = _coreDbContext.Users.AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(paginationParams.SearchTerm))
             {
@@ -84,6 +133,7 @@ namespace CoreBackendApp.Infrastructure.Repositories
         public async Task<UserResponse?> GetByIdWithRolesAsync(Guid userId)
         {
             return await _coreDbContext.Users
+                .AsNoTracking()
                 .Where(u => u.Id == userId)
                 .ProjectToType<UserResponse>()
                 .FirstOrDefaultAsync();

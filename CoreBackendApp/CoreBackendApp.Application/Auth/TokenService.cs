@@ -18,7 +18,9 @@ namespace CoreBackendApp.Application.Auth
         }
 
         public string GenerateAccessToken(
-            User user,
+            Guid userId,
+            string email,
+            Guid tenantId,
             IEnumerable<string> roles,
             IEnumerable<string> permissions,
             IEnumerable<string> features)
@@ -26,14 +28,14 @@ namespace CoreBackendApp.Application.Auth
 
             var claims = new List<Claim>
             {
-                new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new(JwtRegisteredClaimNames.Email, user.Email),
-                new("tenantId", user.TenantId.ToString())
+                new(JwtRegisteredClaimNames.Sub, userId.ToString()),
+                new(JwtRegisteredClaimNames.Email, email),
+                new("tenantId", tenantId.ToString())
             };
 
             claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
-            claims.AddRange(permissions.Select(p => new Claim("permission", p)));
-            claims.AddRange(features.Select(f => new Claim("feature", f)));
+            claims.AddRange(permissions.Select(p => new Claim("permissions", p)));
+            claims.AddRange(features.Select(f => new Claim("features", f)));
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
