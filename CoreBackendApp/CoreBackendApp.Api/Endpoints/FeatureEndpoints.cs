@@ -1,5 +1,5 @@
-using CoreBackendApp.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
+using CoreBackendApp.Api.Common.Extensions;
+using CoreBackendApp.Application.Interface;
 
 namespace CoreBackendApp.Api.Endpoints;
 
@@ -9,11 +9,15 @@ public static class FeatureEndpoints
     {
         var group = endpointRouteBuilder.MapGroup("features").WithTags("Features").RequireAuthorization("features.read");
 
-        group.MapGet("/", async (CoreDbContext coreDbContext) =>
+        group.MapGet("/", async (IFeatureService featureService) =>
         {
-            var features = await coreDbContext.Features.ToListAsync();
-            return Results.Ok(features);
+            var result = await featureService.GetAllAsync();
+            
+            return result.IsSuccess 
+                ? Results.Ok(result.Value) 
+                : result.ToProblemDetails();
         });
+
         return endpointRouteBuilder;
     }
 }

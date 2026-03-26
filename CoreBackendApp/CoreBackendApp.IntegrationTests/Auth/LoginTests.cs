@@ -1,5 +1,8 @@
 using CoreBackendApp.Application.Auth;
+using CoreBackendApp.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
 using Xunit;
@@ -10,6 +13,15 @@ public class LoginTests : BaseIntegrationTest
 {
     public LoginTests(WebApplicationFactory<Api.Program> factory) : base(factory)
     {
+    }
+
+    [Fact]
+    public async Task Debug_CheckUserExists()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<CoreDbContext>();
+        var user = await db.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Email == "admin@core.local");
+        Assert.NotNull(user);
     }
 
     [Fact]

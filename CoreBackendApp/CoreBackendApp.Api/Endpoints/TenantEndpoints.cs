@@ -1,5 +1,5 @@
-using CoreBackendApp.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
+using CoreBackendApp.Api.Common.Extensions;
+using CoreBackendApp.Application.Interface;
 
 namespace CoreBackendApp.Api.Endpoints;
 
@@ -8,19 +8,16 @@ public static class TenantEndpoints
     public static IEndpointRouteBuilder MapTenantEndpoint(this IEndpointRouteBuilder endpointRouteBuilder)
     {
         var group = endpointRouteBuilder.MapGroup("tenants").WithTags("Tenants").RequireAuthorization("tenants.read");
-        group.MapGet("/", async (CoreDbContext coreDbContext) =>
+        
+        group.MapGet("/", async (ITenantService tenantService) =>
         {
-            var tenants = await coreDbContext.Tenants
-                .Select(t => new
-                {
-                    t.Id,
-                    t.Name,
-                    Featires = t.TenantFeatures.Select(tf => tf.Feature.Key)
-                })
-                .ToListAsync();
-
-            return Results.Ok(tenants);
+            var result = await tenantService.GetAllAsync();
+            
+            return result.IsSuccess 
+                ? Results.Ok(result.Value) 
+                : result.ToProblemDetails();
         });
+
         return endpointRouteBuilder;
     }
 }

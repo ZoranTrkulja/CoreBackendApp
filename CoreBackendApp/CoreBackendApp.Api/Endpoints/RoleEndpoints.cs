@@ -1,6 +1,5 @@
-using CoreBackendApp.Domain.Entities;
-using CoreBackendApp.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
+using CoreBackendApp.Api.Common.Extensions;
+using CoreBackendApp.Application.Interface;
 
 namespace CoreBackendApp.Api.Endpoints;
 
@@ -10,38 +9,24 @@ public static class RoleEndpoints
     {
         var group = endpointRouteBuilder.MapGroup("roles").WithTags("Roles").RequireAuthorization("roles.read");
 
-        group.MapGet("/", async (CoreDbContext coreDbContext) =>
+        group.MapGet("/", async (IRoleService roleService) =>
         {
-            var roles = await coreDbContext.Roles
-                .Select(r => new
-                {
-                    r.Id,
-                    r.Name,
-                    Permissions = r.RolePermissions!.Select(rp => new
-                    {
-                        rp.Permission.Code
-                    })
-                })
-                .ToListAsync();
-            return Results.Ok(roles);
+            var result = await roleService.GetAllAsync();
+            
+            return result.IsSuccess 
+                ? Results.Ok(result.Value) 
+                : result.ToProblemDetails();
         });
 
-        group.MapGet("/{id:guid}", async (Guid id, CoreDbContext coreDbContext) =>
+        group.MapGet("/{id:guid}", async (Guid id, IRoleService roleService) =>
         {
-            var role = await coreDbContext.Roles
-                .Where(r => r.Id == id)
-                .Select(r => new
-                {
-                    r.Id,
-                    r.Name,
-                    Permissions = r.RolePermissions!.Select(rp => new
-                    {
-                        rp.Permission.Code
-                    })
-                })
-                .FirstOrDefaultAsync();
-            return Results.Ok(role);
+            var result = await roleService.GetByIdAsync(id);
+            
+            return result.IsSuccess 
+                ? Results.Ok(result.Value) 
+                : result.ToProblemDetails();
         });
+
         return endpointRouteBuilder;
     }
 }

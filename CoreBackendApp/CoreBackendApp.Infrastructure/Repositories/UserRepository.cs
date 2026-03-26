@@ -26,6 +26,7 @@ namespace CoreBackendApp.Infrastructure.Repositories
                     u.UserRoles.Select(ur => ur.Role.Name).ToList(),
                     u.UserRoles.SelectMany(ur => ur.Role.RolePermissions).Select(rp => rp.Permission.Code).Distinct().ToList(),
                     _coreDbContext.TenantFeatures
+                        .IgnoreQueryFilters()
                         .Where(tf => tf.TenantId == u.TenantId)
                         .Select(tf => tf.Feature.Key)
                         .ToList()
@@ -47,6 +48,7 @@ namespace CoreBackendApp.Infrastructure.Repositories
                     u.UserRoles.Select(ur => ur.Role.Name).ToList(),
                     u.UserRoles.SelectMany(ur => ur.Role.RolePermissions).Select(rp => rp.Permission.Code).Distinct().ToList(),
                     _coreDbContext.TenantFeatures
+                        .IgnoreQueryFilters()
                         .Where(tf => tf.TenantId == u.TenantId)
                         .Select(tf => tf.Feature.Key)
                         .ToList()

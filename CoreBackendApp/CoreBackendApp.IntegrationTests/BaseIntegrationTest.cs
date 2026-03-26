@@ -26,7 +26,8 @@ public abstract class BaseIntegrationTest : IClassFixture<WebApplicationFactory<
                 {
                     ["Jwt:Key"] = "SuperSecretTestKeyThatIsVeryLong123!",
                     ["Jwt:Issuer"] = "CoreBackendApp",
-                    ["Jwt:Audience"] = "CoreBackendApp"
+                    ["Jwt:Audience"] = "CoreBackendApp",
+                    ["Jwt:AccessTokenExpirationMinutes"] = "60"
                 });
             });
         });

@@ -2,18 +2,11 @@ using CoreBackendApp.Api.Authorization;
 using CoreBackendApp.Api.Common;
 using CoreBackendApp.Api.Endpoints;
 using CoreBackendApp.Api.Middleware;
-using CoreBackendApp.Application.Auth;
-using CoreBackendApp.Application.Common.Interfaces;
-using CoreBackendApp.Application.Interface;
-using CoreBackendApp.Application.Services;
-using CoreBackendApp.Infrastructure.Identity;
+using CoreBackendApp.Application;
+using CoreBackendApp.Infrastructure;
 using CoreBackendApp.Infrastructure.Persistence;
-using CoreBackendApp.Infrastructure.Repositories;
-using CoreBackendApp.Infrastructure.Services;
-using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -48,11 +41,10 @@ namespace CoreBackendApp.Api
                 // Add services to the container.
                 builder.Services.AddControllers();
                 builder.Services.AddHttpContextAccessor();
+                builder.Services.AddMemoryCache();
                 
-                // Add FluentValidation
-                builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
-
-                builder.Services.AddScoped<ITenantProvider, TenantProvider>();
+                builder.Services.AddApplication();
+                builder.Services.AddInfrastructure(builder.Configuration, builder.Environment.IsEnvironment("Testing"));
 
                 // Add API Versioning
                 builder.Services.AddApiVersioning(options =>
@@ -93,23 +85,6 @@ namespace CoreBackendApp.Api
                     });
                 });
 
-                // Conditional Database Registration
-                if (builder.Environment.EnvironmentName == "Testing")
-                {
-                    builder.Services.AddDbContext<CoreDbContext>(options =>
-                    {
-                        options.UseInMemoryDatabase("TestDatabase");
-                    });
-                }
-                else
-                {
-                    builder.Services.AddDbContext<CoreDbContext>(options =>
-                    {
-                        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? 
-                            throw new InvalidOperationException("Connection string 'DefaultConnection' not found."));
-                    });
-                }
-
                 var jwtSettings = builder.Configuration.GetSection("Jwt");
                 builder.Services
                     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -133,16 +108,7 @@ namespace CoreBackendApp.Api
                 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
                 builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
-                builder.Services.AddScoped<IUserRepository, UserRepository>();
-                builder.Services.AddScoped<ITenantRepository, TenantRepository>();
-                builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-                builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
-                builder.Services.AddScoped<IUserService, UserService>();
-                builder.Services.AddScoped<TokenService>();
-                builder.Services.AddScoped<IAuthService, AuthService>();
-                builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-
-                builder.Services.AddHealthChecks().AddDbContextCheck<CoreDbContext>();
+                builder.Services.AddHealthChecks();
 
                 var app = builder.Build();
 

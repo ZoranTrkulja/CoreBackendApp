@@ -1,5 +1,5 @@
-using CoreBackendApp.Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
+using CoreBackendApp.Api.Common.Extensions;
+using CoreBackendApp.Application.Interface;
 
 namespace CoreBackendApp.Api.Endpoints;
 
@@ -9,32 +9,24 @@ public static class PermissionEndpoints
     {
         var group = endpointRouteBuilder.MapGroup("permissions").WithTags("Permissions").RequireAuthorization("permissions.read");
 
-        group.MapGet("/", async (CoreDbContext coreDbContext) =>
+        group.MapGet("/", async (IPermissionService permissionService) =>
         {
-            var permissions = await coreDbContext.Permissions
-                .Select(p => new
-                {
-                    p.Id,
-                    p.Code,
-                    p.Description
-                })
-                .ToListAsync();
-            return Results.Ok(permissions);
+            var result = await permissionService.GetAllAsync();
+            
+            return result.IsSuccess 
+                ? Results.Ok(result.Value) 
+                : result.ToProblemDetails();
         });
 
-        group.MapGet("/{id:guid}", async (Guid id, CoreDbContext coreDbContext) =>
+        group.MapGet("/{id:guid}", async (Guid id, IPermissionService permissionService) =>
         {
-            var permission = await coreDbContext.Permissions
-                .Where(p => p.Id == id)
-                .Select(p => new
-                {
-                    p.Id,
-                    p.Code,
-                    p.Description
-                })
-                .FirstOrDefaultAsync();
-            return Results.Ok(permission);
+            var result = await permissionService.GetByIdAsync(id);
+            
+            return result.IsSuccess 
+                ? Results.Ok(result.Value) 
+                : result.ToProblemDetails();
         });
+
         return endpointRouteBuilder;
     }
 }

@@ -32,7 +32,8 @@ public static class AuthEndpoints
             return result.IsSuccess 
                 ? Results.Ok(result.Value) 
                 : result.ToProblemDetails();
-        });
+        })
+        .AddEndpointFilter<ValidationFilter<RefreshTokenRequest>>();
 
         group.MapPost("/logout", async (RefreshTokenRequest refreshTokenRequest, IAuthService authService) =>
         {
@@ -41,7 +42,8 @@ public static class AuthEndpoints
             return result.IsSuccess 
                 ? Results.Ok() 
                 : result.ToProblemDetails();
-        });
+        })
+        .AddEndpointFilter<ValidationFilter<RefreshTokenRequest>>();
 
         return endpointRouteBuilder;
     }
